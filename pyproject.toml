@@ -1,0 +1,9 @@
+[tool.poetry]
+name = "solafune-tools"
+version = "0.1.0"
+description = "Solafune internal geodata management tools"
+authors = ["Pushkar Kopparla <pushkar.kopparla@solafune.com>"]
+readme = "README.md"
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::DeprecationWarning"]

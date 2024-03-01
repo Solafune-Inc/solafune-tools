@@ -1,17 +1,26 @@
-import stackstac
+import os
+from statistics import mode
+
 import pystac
 import rioxarray
-from statistics import mode
+import stackstac
+from settings import set_data_directory
+
+if os.getenv("solafune_tools_data_dir") is None:
+    set_data_directory()
+data_dir = os.getenv("solafune_tools_data_dir")
+
 
 def get_most_common_epsg(items):
     epsg_list = []
     for item in items:
-        epsg_list.append(item.to_dict()['properties']['proj:epsg'])
+        epsg_list.append(item.to_dict()["properties"]["proj:epsg"])
     return mode(epsg_list)
 
+
 def make_mosaic(
-    stac_catalog="../data/stac/catalog.json",
-    outfile_loc="../data/outval.tif",
+    stac_catalog=os.path.join(data_dir, "stac/catalog.json"),
+    outfile_loc=os.path.join(data_dir, "outval.tif"),
     epsg=None,
     resolution=100,
 ):

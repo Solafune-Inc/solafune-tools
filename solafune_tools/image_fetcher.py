@@ -14,6 +14,7 @@ from PIL import Image
 
 logging.basicConfig(level=logging.INFO)
 PIL.Image.MAX_IMAGE_PIXELS = 2e8
+data_dir = os.getenv("solafune_tools_data_dir", "data/")
 
 
 def log(func):
@@ -31,7 +32,7 @@ def check_downloaded_file(file_path, raw_file_name) -> bool:
     try:
         Image.open(file_path)
     except Exception as e:
-        with open("logs/bad_responses.txt", "a") as logfile:
+        with open(os.path.join(data_dir, "logs/bad_responses.txt"), "a") as logfile:
             logfile.write(f"{os.path.basename(file_path)} {raw_file_name} {e}\n")
         return False
     return True
@@ -49,7 +50,7 @@ def download_tiff(raw_file_name, band, dest_dir, session) -> int:
             for chunk in response.iter_content(chunk_size=10 * 1024):
                 dest_file.write(chunk)
     else:
-        with open("logs/bad_responses.txt", "a") as logfile:
+        with open(os.path.join(data_dir, "logs/bad_responses.txt"), "a") as logfile:
             logfile.write(f"{response.status_code} {raw_file_name}\n")
 
         if response.status_code == 429:
@@ -77,9 +78,9 @@ def filter_redundant_items(dataframe) -> gpd.GeoDataFrame:
 
 
 def fetch_images(
-    dataframe_path="data/parquet/2023_May_July_CuCoBounds.parquet",
+    dataframe_path=os.path.join(data_dir, "parquet/2023_May_July_CuCoBounds.parquet"),
     bands=["B02", "B03", "B04"],
-    dest_dir="data/tif/",
+    dest_dir=os.path.join(data_dir, "tif/"),
 ) -> None:
     gdf = filter_redundant_items(gpd.read_parquet(dataframe_path))
     assets = gdf.assets
@@ -116,13 +117,16 @@ def make_parquet_filename(
         + "_"
         + base_geometry_name
     )
-    return os.path.join("data/parquet", filename)
+    parq_dir = os.path.join(data_dir, "parquet")
+    if not os.path.isdir(parq_dir):
+        os.mkdir(parq_dir)
+    return os.path.join(parq_dir, filename)
 
 
 def make_stac_query(
     start_date="2023-05-01",
     end_date="2023-08-01",
-    aoi_geometry_file="data/geojson/cu_co_prospect_bounds.geojson",
+    aoi_geometry_file=os.path.join(data_dir, "geojson/cu_co_prospect_bounds.geojson"),
     prefix="",
 ) -> os.PathLike:
     catalog = pystac_client.Client.open(

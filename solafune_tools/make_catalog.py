@@ -1,7 +1,13 @@
-import geopandas as gpd
 import os
-import stac_geoparquet
+
+import geopandas as gpd
 import pystac
+import stac_geoparquet
+from settings import set_data_directory
+
+if os.getenv("solafune_tools_data_dir") is None:
+    set_data_directory()
+data_dir = os.getenv("solafune_tools_data_dir")
 
 
 def get_local_filename(tif_dir, band, remote_href):
@@ -19,10 +25,10 @@ def local_file_links_update(row, bands, tif_dir):
 
 
 def create_local_catalog(
-    input_filename="data/parquet/2023_May_July_CuCoBounds.parquet",
+    input_filename=os.path.join(data_dir, "parquet/2023_May_July_CuCoBounds.parquet"),
     bands=["B04", "B03", "B02"],
-    tif_files_dir="data/tif/sentinel-2/",
-    outdir="home/pushkar/solafune-tools/data/stac/",
+    tif_files_dir=os.path.join(data_dir, "tif/sentinel-2/"),
+    outdir=os.path.join(data_dir, "stac/"),
 ):
     parq = gpd.read_parquet(input_filename)
     parq.assets = parq.assets.apply(

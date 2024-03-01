@@ -1,5 +1,6 @@
-import solafune_tools
 import os
+
+import solafune_tools
 
 
 def test_get_stac_defaults():

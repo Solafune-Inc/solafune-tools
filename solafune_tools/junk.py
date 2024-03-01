@@ -1,9 +1,9 @@
-import pystac
-import statistics
+from dask.distributed import LocalCluster, Client
 
-catalog = pystac.Catalog.from_file("data/stac/catalog.json")
-items = list(catalog.get_items(recursive=True))
-epsg_list = []
-for item in items:
-    epsg_list.append(item.to_dict()['properties']['proj:epsg'])
-print(statistics.mode(epsg_list))
+if __name__=="__main__":
+    cluster = LocalCluster()
+    client = Client(cluster)
+    # address = client.scheduler.address
+    print(client)
+    client.close()
+    cluster.close()

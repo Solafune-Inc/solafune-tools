@@ -3,3 +3,4 @@ __pycache__
 .pytest_cache
 .ruff_cache
 .vscode
+solafune_tools/junk.py

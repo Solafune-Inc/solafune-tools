@@ -4,3 +4,5 @@ __pycache__
 .ruff_cache
 .vscode
 solafune_tools/junk.py
+dist
+solafune_tools.egg-info

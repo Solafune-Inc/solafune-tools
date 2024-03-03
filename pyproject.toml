@@ -1,9 +1,20 @@
-[tool.poetry]
+[project]
 name = "solafune-tools"
-version = "0.1.0"
+version = "0.1.8"
 description = "Solafune internal geodata management tools"
-authors = ["Pushkar Kopparla <pushkar.kopparla@solafune.com>"]
+authors = [
+    {name = "Pushkar Kopparla", email = "pushkar.kopparla@solafune.com"},
+]
 readme = "README.md"
+requires-python = ">=3.10"
+dynamic = ["dependencies"]
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+

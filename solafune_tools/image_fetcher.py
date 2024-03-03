@@ -12,12 +12,17 @@ import requests
 import stac_geoparquet
 from PIL import Image
 
+import solafune_tools.settings
+
 logging.basicConfig(level=logging.INFO)
 PIL.Image.MAX_IMAGE_PIXELS = 2e8
-data_dir = os.getenv("solafune_tools_data_dir", "data/")
+
+data_dir = solafune_tools.settings.get_data_directory()
 
 
-def log(func):
+def _log(func):
+    """Decorator that logs the runtime of a function"""
+
     def wrapper(*args, **kwargs):
         start_time = time.time()
         result = func(*args, **kwargs)
@@ -28,7 +33,8 @@ def log(func):
     return wrapper
 
 
-def check_downloaded_file(file_path, raw_file_name) -> bool:
+def _check_downloaded_file(file_path, raw_file_name) -> bool:
+    """Function that opens a downloaded tif file to check if it is uncorrupted"""
     try:
         Image.open(file_path)
     except Exception as e:
@@ -38,10 +44,11 @@ def check_downloaded_file(file_path, raw_file_name) -> bool:
     return True
 
 
-@log
-def download_tiff(raw_file_name, band, dest_dir, session) -> int:
-    dest_file_loc = f"{dest_dir}/{band}/{os.path.basename(raw_file_name)}"
-    if os.path.isfile(dest_file_loc) and check_downloaded_file(dest_file_loc):
+@_log
+def _download_tiff(raw_file_name, dest_dir, session) -> int:
+    """Downloads a single file given a filename and destination directory"""
+    dest_file_loc = f"{dest_dir}/{os.path.basename(raw_file_name)}"
+    if os.path.isfile(dest_file_loc) and _check_downloaded_file(dest_file_loc):
         return 200
     sample = planetary_computer.sign(raw_file_name)
     response = session.get(sample, stream=True)
@@ -55,12 +62,13 @@ def download_tiff(raw_file_name, band, dest_dir, session) -> int:
 
         if response.status_code == 429:
             sys.exit("too many requests")
-    check_downloaded_file(dest_file_loc, raw_file_name)
+    _check_downloaded_file(dest_file_loc, raw_file_name)
     print(dest_file_loc)
     return response.status_code
 
 
-def setup_directories(dest_dir, bands) -> None:
+def _setup_directories(dest_dir, bands) -> None:
+    """Sets up subdirectories for each band in the download directory"""
     for band in bands:
         band_dir = os.path.join(dest_dir, band)
         if not os.path.isdir(band_dir):
@@ -68,7 +76,11 @@ def setup_directories(dest_dir, bands) -> None:
     return None
 
 
-def filter_redundant_items(dataframe) -> gpd.GeoDataFrame:
+def _filter_redundant_items(dataframe) -> gpd.GeoDataFrame:
+    """
+    Filtering function to reduce the number of files to be downloaded.
+    Need to add few more conditions, currently only one.
+    """
     reduce_df = (
         dataframe.sort_values(by=["s2:nodata_pixel_percentage", "eo:cloud_cover"])
         .groupby(["geometry"])
@@ -77,27 +89,30 @@ def filter_redundant_items(dataframe) -> gpd.GeoDataFrame:
     return reduce_df
 
 
-def fetch_images(
+def planetary_computer_fetch_images(
     dataframe_path=os.path.join(data_dir, "parquet/2023_May_July_CuCoBounds.parquet"),
     bands=["B02", "B03", "B04"],
     dest_dir=os.path.join(data_dir, "tif/"),
 ) -> None:
-    gdf = filter_redundant_items(gpd.read_parquet(dataframe_path))
+    """
+    Iterates over assets in a catalog in geoparquet file and downloads
+    selected bands.
+    """
+    gdf = _filter_redundant_items(gpd.read_parquet(dataframe_path))
     assets = gdf.assets
 
-    _ = setup_directories(dest_dir, bands)
+    _ = _setup_directories(dest_dir, bands)
     total = len(gdf.assets)
     session = requests.Session()
     st = time.time()
     for count, each in enumerate(assets):
-        print(f"On file {count+1} of {total}")
+        print(f"Downloading file {count+1} of {total}")
         for band in bands:
-            print(band)
+            print(f"Downloading {band}")
             get_file = each[band]["href"]
-            download_tiff(
+            _download_tiff(
                 raw_file_name=get_file.strip(),
-                band=band,
-                dest_dir=dest_dir,
+                dest_dir=os.path.join(dest_dir, band),
                 session=session,
             )
     et = time.time()
@@ -105,9 +120,13 @@ def fetch_images(
     return None
 
 
-def make_parquet_filename(
+def _make_parquet_filename(
     prefix, start_date, end_date, aoi_geometry_file
 ) -> os.PathLike:
+    """
+    Creates a filename including metadata to store a stac catalog
+    as a geoparquet file.
+    """
     base_geometry_name = os.path.splitext(os.path.basename(aoi_geometry_file))[0]
     filename = (
         prefix
@@ -123,12 +142,16 @@ def make_parquet_filename(
     return os.path.join(parq_dir, filename)
 
 
-def make_stac_query(
+def planetary_computer_stac_query(
     start_date="2023-05-01",
     end_date="2023-08-01",
     aoi_geometry_file=os.path.join(data_dir, "geojson/cu_co_prospect_bounds.geojson"),
     prefix="",
 ) -> os.PathLike:
+    """
+    Downloads a STAC catalog for a given geometry and daterange and saves
+    it to a geoparquet file.
+    """
     catalog = pystac_client.Client.open(
         "https://planetarycomputer.microsoft.com/api/stac/v1",
         modifier=planetary_computer.sign_inplace,
@@ -148,7 +171,7 @@ def make_stac_query(
     items = search.item_collection()
     item_list = [item.to_dict() for item in items]
     df = stac_geoparquet.to_geodataframe(item_list)
-    outfile_name = make_parquet_filename(
+    outfile_name = _make_parquet_filename(
         prefix, start_date, end_date, aoi_geometry_file
     )
     df.to_parquet(outfile_name)

@@ -8,9 +8,9 @@ import pystac
 import rioxarray
 import stackstac
 
-import solafune_tools
+import solafune_tools.settings
 
-data_dir = solafune_tools.get_data_directory()
+data_dir = solafune_tools.settings.get_data_directory()
 
 
 def _get_most_common_epsg(items):

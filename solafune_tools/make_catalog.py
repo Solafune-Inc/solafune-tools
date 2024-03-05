@@ -9,9 +9,9 @@ import rioxarray
 import stac_geoparquet
 from shapely.geometry import Polygon, mapping
 
-import solafune_tools
+import solafune_tools.settings
 
-data_dir = solafune_tools.get_data_directory()
+data_dir = solafune_tools.settings.get_data_directory()
 
 
 def _get_local_filename(tif_dir, band, remote_href):

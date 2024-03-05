@@ -16,10 +16,21 @@ solafune_tools.set_data_directory(dir_path="your_data_dir_here")
 ```
 The above command sets the environment variable `solafune_tools_data_dir` from where all sub-modules draw their file paths. It is not set persistenly (i.e., not written to `.bashrc` or similar), so you will need to set it each time you ssh into your machine or on reboot. If you do not explicitly set this, it will default to creating/using a `data` folder within your current working directory.
 
-A one-shot command exists to make a cloudless mosaic given a daterange and area of interest. You can use it like this:
+A one-shot command exists to make a cloudless mosaic given a daterange and area of interest. 
+Before running this function, create a Dask server and client. This function uses lazy chunked xarray Dataarrays which can (and should) be processed in parallel. The simplest way to do so is to open a Jupyter notebook and paste the following code into it. If you call this from within a python script, you need to put it under a ` if __name__ == "__main__":` block to work.
 
 ```python
-mosaic_catalog = solafune_tools.create_basemap(
+from dask.distributed import Client, LocalCluster
+
+cluster = LocalCluster()
+client = Client(cluster)
+client
+```
+It will print out a dashboard link for your cluster that you can use to track the progress of your function. The actual function call is below.
+
+
+```python
+mosaics_catalog = solafune_tools.create_basemap(
     start_date="2023-05-01",
     end_date="2023-08-01",
     aoi_geometry_file="data/geojson/xyz_bounds.geojson",
@@ -61,16 +72,7 @@ local_stac_catalog = solafune_tools.create_local_catalog_from_existing(
     outfile_dir='Auto',
 )
 ```
-4. Make a cloudless mosaic. Before running this function, create a Dask server and client. This function uses lazy chunked xarray Dataarrays which can (and should) be processed in parallel. The simplest way to do so is to open a Jupyter notebook and paste the following code into it. If you call this from within a python script, you need to put it under a ` if __name__ == "__main__":` block to work.
-
-```python
-from dask.distributed import Client, LocalCluster
-
-cluster = LocalCluster()
-client = Client(cluster)
-client
-```
-It will print out a dashboard link for your cluster that you can use to track the progress of your function. The actual function call is below.
+4. Make a cloudless mosaic. Make sure to have a Dask cluster running for this step. Otherwise, it will either take days to finish or crash out with memory errors.
 
 ```python
 mosaic_file_loc = solafune_tools.make_mosaic(

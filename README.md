@@ -4,22 +4,22 @@ This package contains tools to download STAC catalogs and Sentinel-2 imagery fro
 
 ## Quickstart
 
-Install the package using `pip`, recommend using python 3.10:
+Install the package using `pip` or `uv pip`, recommend using `python 3.10`:
 
 ``` 
-pip install solafune_tools
+uv pip install solafune_tools
 ```
 
 Before using the library, you can set the directory where you want to store data by calling
 ```
 solafune_tools.set_data_directory(dir_path="your_data_dir_here")
 ```
-The above command sets the environment variable 'solafune_tools_data_dir' from where all sub-modules draw their file paths. If you do not explicitly set this, it will default to creating a `data` folder within your current working directory.
+The above command sets the environment variable `solafune_tools_data_dir` from where all sub-modules draw their file paths. If you do not explicitly set this, it will default to creating a `data` folder within your current working directory.
 
-A typical workflow to assemble a cloudless mosaic is as follows:
+A typical workflow to assemble a cloudless mosaic is as follows. I strongly recommend leaving all outfile and outdirectory naming to 'Auto'.
 
 1. Get the Sentinel-2 catalog items for your area of interest (pass in a geojson) and a date range.
-```
+```python
 plc_stac_catalog = solafune_tools.planetary_computer_stac_query(
     start_date="2023-05-01",
     end_date="2023-08-01",
@@ -29,34 +29,56 @@ plc_stac_catalog = solafune_tools.planetary_computer_stac_query(
 
 2. Download files for the bands you want for these catalog items.
 
-```
-solafune_tools.planetary_computer_fetch_images(
+```python
+tiffile_dir = solafune_tools.planetary_computer_fetch_images(
     dataframe_path=plc_stac_catalog,
     bands=["B02", "B03", "B04"],
-    dest_dir=os.path.join(data_dir, "tif/"),
+    outfile_dir='Auto',
 )
 ```
 3. Assemble a STAC catalog of local files (this is necessary for mosaicking)
 
-```
-local_stac = solafune_tools.make_catalog(
-    input_filename=plc_stac_catalog,
+```python
+local_stac_catalog = solafune_tools.create_local_catalog_from_existing(
+    input_catalog_parquet=plc_stac_catalog,
     bands=["B04", "B03", "B02"],
-    tif_files_dir=os.path.join(data_dir, "tif/"),
-    outdir=os.path.join(data_dir, "stac/"),
+    tif_files_dir=tiffile_dir,
+    outfile_dir='Auto',
 )
 ```
-4. Make a cloudless mosaic
+4. Make a cloudless mosaic. Before running this function, create a Dask server and client. This function uses lazy chunked xarray Dataarrays which can (and should) be processed in parallel. The simplest way to do so is to open a Jupyter notebook and paste the following code into it. If you call this from within a python script, you need to put it under a ` if __name__ == "__main__":` block to work.
 
+```python
+from dask.distributed import Client, LocalCluster
+
+cluster = LocalCluster()
+client = Client(cluster)
+client
 ```
+It will print out a dashboard link for your cluster that you can use to track the progress of your function. The actual function call is below.
+
+```python
 mosaic_file_loc = solafune_tools.make_mosaic(
-    stac_catalog = local_stac,
-    outfile_loc = os.path.join(
-    data_dir, 
-    "mosaics", 
-    "outval.tif"
-    ),
-    epsg = None,
+    local_stac_catalog = local_stac_catalog,
+    outfile_loc = 'Auto',
+    out_epsg = 'Auto',
     resolution = 100,
-):
+)
+```
+5. Update the STAC catalog for the mosaics folder.
+```python
+mosaics_catalog = solafune_tools.create_local_catalog_from_scratch(
+    infile_dir = os.path.dirname(mosaic_file_loc),
+    outfile_loc = 'Auto'
+    )
+```
+
+6. The STAC catalog contains the geometry, date range and bands for each mosaic tif stored in the directory. Now you can query the catalog by loading it as a `Geopandas.geodataframe` and filtering for various conditions. The links for each mosaic are stored under the column `assets` under the dictionary key `mosaic`. 
+```python
+geodataframe = solafune_tools.get_catalog_items_as_gdf(mosaics_catalog)
+your_query = geodataframe.geometry.intersects(your_roi_geometry) & (geodataframe['datetime']=='2021-03-01')
+results = geodataframe[your_query]
+your_mosaic_tif_locs = results.assets['mosaic']
+# merge your mosaic tifs, do windowed reads, whatever else you need
+
 ```

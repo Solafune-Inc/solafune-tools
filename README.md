@@ -88,12 +88,12 @@ mosaics_catalog = solafune_tools.create_local_catalog_from_scratch(
     )
 ```
 
-6. The STAC catalog contains the geometry, date range and bands for each mosaic tif stored in the directory. Now you can query the catalog by loading it as a `Geopandas.geodataframe` and filtering for various conditions. The links for each mosaic are stored under the column `assets` under the dictionary key `mosaic`. 
+6. The STAC catalog contains the geometry, date range and bands for each mosaic tif stored in the directory. Now you can query the catalog by loading it as a `Geopandas.geodataframe` and filtering for various conditions. The links for each mosaic are stored under the column `assets` under the dictionary key `mosaic` followed by `href`. 
 ```python
 geodataframe = solafune_tools.get_catalog_items_as_gdf(mosaics_catalog)
 your_query = geodataframe.geometry.intersects(your_roi_geometry) & (geodataframe['datetime']=='2021-03-01')
 results = geodataframe[your_query]
-your_mosaic_tif_locs = results.assets['mosaic']
+your_mosaic_tif_locs = [asset['mosaic']['href'] for asset in results.assets]
 # merge your mosaic tifs, do windowed reads, whatever else you need
 
 ```

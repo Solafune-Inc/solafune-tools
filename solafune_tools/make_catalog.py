@@ -9,13 +9,13 @@ import rioxarray
 import stac_geoparquet
 from shapely.geometry import Polygon, mapping
 
-import solafune_tools.settings
+import solafune_tools
 
-data_dir = solafune_tools.settings.get_data_directory()
+data_dir = solafune_tools.get_data_directory()
 
 
 def _get_local_filename(tif_dir, band, remote_href):
-    """ Utility for creating local filenames based on remote filenames """
+    """Utility for creating local filenames based on remote filenames"""
     cwd = os.getcwd()
     basename = os.path.basename(remote_href)
     outfile_loc = os.path.join(cwd, tif_dir, band, basename)
@@ -23,7 +23,7 @@ def _get_local_filename(tif_dir, band, remote_href):
 
 
 def _local_file_links_update(row, bands, tif_dir):
-    """ Utility for updating local file location paths """
+    """Utility for updating local file location paths"""
     new_row = {band: row[band] for band in bands}
     for band in new_row.keys():
         new_row[band]["href"] = _get_local_filename(tif_dir, band, row[band]["href"])
@@ -38,8 +38,8 @@ def create_local_catalog_from_existing(
     tif_files_dir=os.path.join(data_dir, "tif/"),
     outfile_dir="Auto",
 ):
-    """ 
-    Update a downloaded Planetary Computer STAC catalog geoparquet file into a  
+    """
+    Update a downloaded Planetary Computer STAC catalog geoparquet file into a
     local STAC catalog for stacking and mosaicking using the library stackstac
     """
     if outfile_dir == "Auto":
@@ -53,7 +53,8 @@ def create_local_catalog_from_existing(
         _local_file_links_update, bands=bands, tif_dir=tif_files_dir
     )
     catalog = pystac.Catalog(
-        id="local", description="A local catalog for selected scenes downloaded from a remote repo"
+        id="local",
+        description="A local catalog for selected scenes downloaded from a remote repo",
     )
     item_collection = stac_geoparquet.to_item_collection(parq)
     for item in item_collection:
@@ -68,7 +69,7 @@ def create_local_catalog_from_existing(
 
 
 def _get_bbox_and_footprint(raster):
-    """ Utility for getting bbox and geometry from a raster """
+    """Utility for getting bbox and geometry from a raster"""
     with rasterio.open(raster) as r:
         bounds = r.bounds
         bbox = [bounds.left, bounds.bottom, bounds.right, bounds.top]
@@ -85,7 +86,7 @@ def _get_bbox_and_footprint(raster):
 
 
 def _get_datetime(path):
-    """ Utility for getting start and end dates from a filename"""
+    """Utility for getting start and end dates from a filename"""
     filename = os.path.basename(path)
     start_date = datetime.strptime(filename[0:10], "%Y_%m_%d")
     end_date = filename[11:21]
@@ -95,7 +96,7 @@ def _get_datetime(path):
 def create_local_catalog_from_scratch(
     infile_dir=os.path.join(data_dir, "tif", "mosaic"), outfile_loc="Auto"
 ) -> os.PathLike:
-    """ Creates a local STAC catalog given a folder of tif files """
+    """Creates a local STAC catalog given a folder of tif files"""
     catalog = pystac.Catalog(
         id="mosaics",
         description="This catalog contains median mosaics created from Sentinel-2 data",
@@ -111,7 +112,7 @@ def create_local_catalog_from_scratch(
             transform = list(r.transform)
             shape = r.shape
         with rioxarray.open_rasterio(img_path) as ds:
-            bands = list(ds.band.data.astype('str'))
+            bands = list(ds.band.data.astype("str"))
         item = pystac.Item(
             id=os.path.splitext(os.path.basename(img_path))[0],
             geometry=footprint,
@@ -149,7 +150,7 @@ def create_local_catalog_from_scratch(
 def get_catalog_items_as_gdf(
     file_path: str | os.PathLike = os.path.join(data_dir, "stac/catalog.json"),
 ) -> gpd.GeoDataFrame:
-    """ Loads a STAC catalog as a geopandas GeoDataFrame """
+    """Loads a STAC catalog as a geopandas GeoDataFrame"""
     catalog = pystac.Catalog.from_file(file_path)
     # collection = catalog.get_child(id='Sentinel-2')
     item_links = [x.to_dict() for x in catalog.get_items()]

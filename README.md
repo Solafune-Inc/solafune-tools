@@ -14,16 +14,31 @@ Before using the library, you can set the directory where you want to store data
 ```
 solafune_tools.set_data_directory(dir_path="your_data_dir_here")
 ```
-The above command sets the environment variable `solafune_tools_data_dir` from where all sub-modules draw their file paths. If you do not explicitly set this, it will default to creating a `data` folder within your current working directory.
+The above command sets the environment variable `solafune_tools_data_dir` from where all sub-modules draw their file paths. It is not set persistenly (i.e., not written to `.bashrc` or similar), so you will need to set it each time you ssh into your machine or on reboot. If you do not explicitly set this, it will default to creating/using a `data` folder within your current working directory.
 
-A typical workflow to assemble a cloudless mosaic is as follows. I strongly recommend leaving all outfile and outdirectory naming to 'Auto'.
+A one-shot command exists to make a cloudless mosaic given a daterange and area of interest. You can use it like this:
+
+```python
+mosaic_catalog = solafune_tools.create_basemap(
+    start_date="2023-05-01",
+    end_date="2023-08-01",
+    aoi_geometry_file="data/geojson/xyz_bounds.geojson",
+    bands=["B02", "B03", "B04"],
+    mosaic_epsg="Auto",
+    mosaic_resolution=100,
+)
+```
+The output is a link to a STAC catalog of all mosaics generated so far in the current data directory. See point 6 in the workflow below to see how to load and query it.
+
+A typical workflow to assemble a cloudless mosaic is as follows. I strongly recommend leaving all outfile and outdirectory naming to 'Auto' if you choose to run these functions one by one.
 
 1. Get the Sentinel-2 catalog items for your area of interest (pass in a geojson) and a date range.
 ```python
 plc_stac_catalog = solafune_tools.planetary_computer_stac_query(
     start_date="2023-05-01",
     end_date="2023-08-01",
-    aoi_geometry_file= "data/geojson/xyz_bounds.geojson"),
+    aoi_geometry_file= "data/geojson/xyz_bounds.geojson",
+    outfile_name='Auto'
 )
 ```
 
@@ -59,17 +74,17 @@ It will print out a dashboard link for your cluster that you can use to track th
 
 ```python
 mosaic_file_loc = solafune_tools.make_mosaic(
-    local_stac_catalog = local_stac_catalog,
-    outfile_loc = 'Auto',
-    out_epsg = 'Auto',
-    resolution = 100,
+    local_stac_catalog=local_stac_catalog,
+    outfile_loc='Auto',
+    out_epsg='Auto',
+    resolution=100,
 )
 ```
 5. Update the STAC catalog for the mosaics folder.
 ```python
 mosaics_catalog = solafune_tools.create_local_catalog_from_scratch(
-    infile_dir = os.path.dirname(mosaic_file_loc),
-    outfile_loc = 'Auto'
+    infile_dir=os.path.dirname(mosaic_file_loc),
+    outfile_loc='Auto'
     )
 ```
 

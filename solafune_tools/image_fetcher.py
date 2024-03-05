@@ -124,9 +124,7 @@ def planetary_computer_fetch_images(
     return outfile_dir
 
 
-def _make_parquet_filename(
-    start_date, end_date, aoi_geometry_file
-) -> os.PathLike:
+def _make_parquet_filename(start_date, end_date, aoi_geometry_file) -> os.PathLike:
     """
     Creates a filename including metadata to store a stac catalog
     as a geoparquet file.
@@ -150,7 +148,7 @@ def planetary_computer_stac_query(
     start_date="2023-05-01",
     end_date="2023-08-01",
     aoi_geometry_file=os.path.join(data_dir, "geojson/cu_co_prospect_bounds.geojson"),
-    outfile_name='Auto',
+    outfile_name="Auto",
 ) -> os.PathLike:
     """
     Downloads a STAC catalog for a given geometry and daterange and saves
@@ -175,9 +173,7 @@ def planetary_computer_stac_query(
     items = search.item_collection()
     item_list = [item.to_dict() for item in items]
     df = stac_geoparquet.to_geodataframe(item_list)
-    if outfile_name == 'Auto':
-        outfile_name = _make_parquet_filename(
-            start_date, end_date, aoi_geometry_file
-        )
+    if outfile_name == "Auto":
+        outfile_name = _make_parquet_filename(start_date, end_date, aoi_geometry_file)
     df.to_parquet(outfile_name)
     return outfile_name

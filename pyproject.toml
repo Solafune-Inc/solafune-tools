@@ -1,6 +1,6 @@
 [project]
 name = "solafune-tools"
-version = "0.1.11"
+version = "0.1.12"
 description = "Solafune internal geodata management tools"
 authors = [
     {name = "Pushkar Kopparla", email = "pushkar.kopparla@solafune.com"},

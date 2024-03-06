@@ -9,6 +9,7 @@ import rioxarray
 import stac_geoparquet
 from shapely.geometry import Polygon, mapping
 
+import solafune_tools.image_fetcher
 import solafune_tools.settings
 
 data_dir = solafune_tools.settings.get_data_directory()
@@ -17,7 +18,7 @@ data_dir = solafune_tools.settings.get_data_directory()
 def _get_local_filename(tif_dir, band, remote_href):
     """Utility for creating local filenames based on remote filenames"""
     cwd = os.getcwd()
-    basename = os.path.basename(remote_href)
+    basename = os.path.basename(remote_href.split(".tif")[0] + ".tif")
     outfile_loc = os.path.join(cwd, tif_dir, band, basename)
     return outfile_loc
 
@@ -48,7 +49,10 @@ def create_local_catalog_from_existing(
             "stac",
             os.path.splitext(os.path.basename(input_catalog_parquet))[0],
         )
-    parq = gpd.read_parquet(input_catalog_parquet)
+    parq = solafune_tools.image_fetcher.filter_redundant_items(
+        gpd.read_parquet(input_catalog_parquet)
+    )
+
     parq.assets = parq.assets.apply(
         _local_file_links_update, bands=bands, tif_dir=tif_files_dir
     )

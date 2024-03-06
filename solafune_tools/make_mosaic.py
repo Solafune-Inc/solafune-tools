@@ -21,7 +21,7 @@ def _get_most_common_epsg(items):
     return mode(epsg_list)
 
 
-def make_mosaic(
+def create_mosaic(
     local_stac_catalog=os.path.join(data_dir, "stac/catalog.json"),
     outfile_loc="Auto",
     out_epsg="Auto",

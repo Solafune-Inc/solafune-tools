@@ -47,8 +47,10 @@ def _check_downloaded_file(file_path, raw_file_name) -> bool:
 @_log
 def _download_tiff(raw_file_name, outfile_dir, session) -> int:
     """Downloads a single file given a filename and destination directory"""
-    dest_file_loc = f"{outfile_dir}/{os.path.basename(raw_file_name)}"
-    if os.path.isfile(dest_file_loc) and _check_downloaded_file(dest_file_loc):
+    dest_file_loc = os.path.join(outfile_dir, os.path.basename(raw_file_name))
+    if os.path.isfile(dest_file_loc) and _check_downloaded_file(
+        dest_file_loc, raw_file_name
+    ):
         return 200
     sample = planetary_computer.sign(raw_file_name)
     response = session.get(sample, stream=True)
@@ -78,7 +80,7 @@ def _setup_directories(outfile_dir, bands) -> None:
     return None
 
 
-def _filter_redundant_items(dataframe) -> gpd.GeoDataFrame:
+def filter_redundant_items(dataframe) -> gpd.GeoDataFrame:
     """
     Filtering function to reduce the number of files to be downloaded.
     Need to add few more conditions, currently only one.
@@ -101,7 +103,7 @@ def planetary_computer_fetch_images(
     Iterates over assets in a catalog in geoparquet file and downloads
     selected bands.
     """
-    gdf = _filter_redundant_items(gpd.read_parquet(dataframe_path))
+    gdf = filter_redundant_items(gpd.read_parquet(dataframe_path))
     assets = gdf.assets
     if outfile_dir == "Auto":
         outfile_dir = os.path.join(
@@ -116,7 +118,7 @@ def planetary_computer_fetch_images(
             print(f"Downloading {band}")
             get_file = each[band]["href"]
             _download_tiff(
-                raw_file_name=get_file.strip(),
+                raw_file_name=get_file.split(".tif")[0] + ".tif",
                 outfile_dir=os.path.join(outfile_dir, band),
                 session=session,
             )

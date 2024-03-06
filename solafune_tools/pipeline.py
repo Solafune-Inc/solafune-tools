@@ -30,7 +30,7 @@ def create_basemap(
         outfile_dir="Auto",
     )
 
-    mosaic_file_loc = solafune_tools.make_mosaic.make_mosaic(
+    mosaic_file_loc = solafune_tools.make_mosaic.create_mosaic(
         local_stac_catalog=local_stac_catalog,
         outfile_loc="Auto",
         out_epsg=mosaic_epsg,

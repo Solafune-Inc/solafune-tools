@@ -75,7 +75,7 @@ local_stac_catalog = solafune_tools.create_local_catalog_from_existing(
 4. Make a cloudless mosaic. Make sure to have a Dask cluster running for this step. Otherwise, it will either take days to finish or crash out with memory errors.
 
 ```python
-mosaic_file_loc = solafune_tools.make_mosaic(
+mosaic_file_loc = solafune_tools.create_mosaic(
     local_stac_catalog=local_stac_catalog,
     outfile_loc='Auto',
     out_epsg='Auto',

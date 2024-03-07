@@ -77,6 +77,7 @@ local_stac_catalog = solafune_tools.create_local_catalog_from_existing(
 ```python
 mosaic_file_loc = solafune_tools.create_mosaic(
     local_stac_catalog=local_stac_catalog,
+    aoi_geometry_file="data/geojson/xyz_bounds.geojson",
     outfile_loc='Auto',
     out_epsg='Auto',
     resolution=100,

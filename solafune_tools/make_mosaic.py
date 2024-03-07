@@ -1,7 +1,7 @@
 import logging
 import os
 from statistics import mode
-
+import json
 import pystac
 # even though rioxarray is not explicitly used,
 # it is needed for rio.to_raster on xarray dataarray
@@ -23,6 +23,7 @@ def _get_most_common_epsg(items):
 
 def create_mosaic(
     local_stac_catalog=os.path.join(data_dir, "stac/catalog.json"),
+    aoi_geometry_file=os.path.join(data_dir, "geojson/cu_co_prospect_bounds.geojson"),
     outfile_loc="Auto",
     out_epsg="Auto",
     resolution=100,
@@ -42,7 +43,9 @@ def create_mosaic(
     items = list(catalog.get_items(recursive=True))
     if out_epsg == "Auto":
         out_epsg = _get_most_common_epsg(items)
-
+    with open(aoi_geometry_file) as f:
+        data = json.load(f)
+    area_of_interest = data["features"][0]["geometry"]
     stack = stackstac.stack(items, epsg=out_epsg, resolution=resolution)
     median = (
         stack.dropna(dim="time", how="all")
@@ -60,5 +63,6 @@ def create_mosaic(
     # set band index to names instead of numerical index
     bands = list(items[0].assets.keys())
     outval["band"] = bands
-    outval.rio.to_raster(outfile_loc)
+    clipped = outval.rio.clip(geometries = [area_of_interest], crs = 4326 )
+    clipped.rio.to_raster(outfile_loc)
     return outfile_loc

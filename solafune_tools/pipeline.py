@@ -32,6 +32,7 @@ def create_basemap(
 
     mosaic_file_loc = solafune_tools.make_mosaic.create_mosaic(
         local_stac_catalog=local_stac_catalog,
+        aoi_geometry_file=aoi_geometry_file,
         outfile_loc="Auto",
         out_epsg=mosaic_epsg,
         resolution=mosaic_resolution,

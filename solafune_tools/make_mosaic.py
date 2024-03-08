@@ -22,8 +22,8 @@ def _get_most_common_epsg(items):
 
 
 def create_mosaic(
-    local_stac_catalog=os.path.join(data_dir, "stac/catalog.json"),
-    aoi_geometry_file=os.path.join(data_dir, "geojson/cu_co_prospect_bounds.geojson"),
+    local_stac_catalog=os.path.join(data_dir, "stac" , "catalog.json"),
+    aoi_geometry_file=os.path.join(data_dir, "geojson", "cu_co_prospect_bounds.geojson"),
     outfile_loc="Auto",
     out_epsg="Auto",
     resolution=100,

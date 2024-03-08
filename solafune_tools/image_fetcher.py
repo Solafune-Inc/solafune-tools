@@ -90,6 +90,13 @@ def filter_redundant_items(dataframe) -> gpd.GeoDataFrame:
         .groupby(["geometry"])
         .head(5)
     )
+    """
+    count_index = rdf.geometry.map(rdf.geometry.value_counts()) >= 5
+    suff_count_shape = rdf.geometry.loc[count_index].unary_union
+    shape_index = np.logical_not(np.isclose(rdf.geometry.union(suff_count_shape).area, suff_count_shape.area, rtol=5e-2))
+    total_index = count_index | shape_index
+    
+    """
     return reduce_df
 
 

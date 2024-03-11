@@ -8,7 +8,7 @@ data_dir = solafune_tools.settings.get_data_directory()
 def create_basemap(
     start_date="2023-05-01",
     end_date="2023-08-01",
-    aoi_geometry_file=os.path.join("tests","data-test","geojson","sample.geojson"),
+    aoi_geometry_file=os.path.join("tests", "data-test", "geojson", "sample.geojson"),
     bands=["B02", "B03", "B04"],
     mosaic_epsg="Auto",
     mosaic_resolution=100,

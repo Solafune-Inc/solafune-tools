@@ -18,3 +18,7 @@ filterwarnings = ["ignore::DeprecationWarning"]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+where = ["solafune_tools"]
+exclude = ["data"]  # alternatively: `exclude = ["additional*"]`
+namespaces = false

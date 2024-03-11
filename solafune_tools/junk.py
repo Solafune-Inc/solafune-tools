@@ -1,8 +1,5 @@
-import geopandas as gpd
-import shapely
+import math
 
-gdf = gpd.read_parquet("tests/data-test/parquet/sample.parquet")
-geom1 = gdf.geometry.iloc[0]
-geom2 = gdf.geometry.iloc[2]
-
-print(shapely.equals(geom1.union(geom2).union(geom1), geom2))
+n_x = math.ceil(398/100)
+for i in range(n_x):
+    print(i*100,(i+1)*100)

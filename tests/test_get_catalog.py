@@ -44,8 +44,9 @@ import pytest
 #     # Assert that the file was written to with the expected text.
 #     mock_file().write.assert_called_once_with("hello")
 
+
 # @pytest.fixture()
-def get_catalog(junk='Auto'):
+def get_catalog(junk="Auto"):
     if junk:
         pass
     catalog = pystac_client.Client.open(
@@ -55,14 +56,16 @@ def get_catalog(junk='Auto'):
     time.time()
     return catalog
 
+
 # def test_get_catalog(get_catalog):
 #     assert isinstance(get_catalog, pystac_client.Client)
 
+
 def test_get_catalog_with_mock(mocker):
     # mock_catalog = mocker.mock_open()
-    mocker.patch('pystac_client.Client.open')#, mock_catalog)
-    mocker.patch('time.time')
-    get_catalog(junk='what')
+    mocker.patch("pystac_client.Client.open")  # , mock_catalog)
+    mocker.patch("time.time")
+    get_catalog(junk="what")
     # mock_catalog.assert_called_once_with("https://planetarycomputer.microsoft.com/api/stac/v1",
     #     modifier=planetary_computer.sign_inplace,)
     pystac_client.Client.open.assert_called_once()

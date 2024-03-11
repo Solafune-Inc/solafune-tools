@@ -156,7 +156,7 @@ def _make_parquet_filename(start_date, end_date, aoi_geometry_file) -> os.PathLi
 def planetary_computer_stac_query(
     start_date="2023-05-01",
     end_date="2023-08-01",
-    aoi_geometry_file=os.path.join("tests","data-test","geojson","sample.geojson"),
+    aoi_geometry_file=os.path.join("tests", "data-test", "geojson", "sample.geojson"),
     outfile_name="Auto",
 ) -> os.PathLike:
     """

@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 from statistics import mode
 import json
 import pystac
@@ -24,9 +25,7 @@ def _get_most_common_epsg(items):
 
 def create_mosaic(
     local_stac_catalog=os.path.join(data_dir, "stac", "catalog.json"),
-    aoi_geometry_file=os.path.join(
-        data_dir, "geojson", "cu_co_prospect_bounds.geojson"
-    ),
+    aoi_geometry_file=None,
     outfile_loc="Auto",
     out_epsg="Auto",
     resolution=100,
@@ -47,16 +46,21 @@ def create_mosaic(
     items = list(catalog.get_items(recursive=True))
     if out_epsg == "Auto":
         out_epsg = _get_most_common_epsg(items)
-    with open(aoi_geometry_file) as f:
-        data = json.load(f)
-    area_of_interest = data["features"][0]["geometry"]
+
     stack = stackstac.stack(items, epsg=out_epsg, resolution=resolution)
     median = (
         stack.dropna(dim="time", how="all")
         .groupby("band")
         .median(dim="time", skipna=True)
-        .rio.clip(geometries=[area_of_interest], crs=4326)
     )
+
+    if aoi_geometry_file != None:
+        print(aoi_geometry_file, 'IS NOT NONE')
+        with open(aoi_geometry_file) as f:
+            data = json.load(f)
+        area_of_interest = data["features"][0]["geometry"]
+        median = median.rio.clip(geometries=[area_of_interest], crs=4326)
+        
     bands = list(items[0].assets.keys())
 
     if tile_size == None:
@@ -70,30 +74,33 @@ def create_mosaic(
             os.mkdir(os.path.dirname(outfile_loc))
         # set band index to names instead of numerical index
         outval["band"] = bands
-        outval.rio.to_raster(outfile_loc)
+        outval.astype('uint16').rio.to_raster(outfile_loc)
         return outfile_loc
-    
+
     else:
         n_x_tiles = math.ceil(len(median.x) / tile_size)
         n_y_tiles = math.ceil(len(median.y) / tile_size)
 
         if outfile_loc == "Auto":
+            catalog_basename = os.path.split(os.path.dirname(local_stac_catalog))[-1]
             outdir_loc = os.path.join(
                 data_dir,
                 "mosaic",
-                os.path.split(os.path.dirname(local_stac_catalog))[-1],
+                catalog_basename,
             )
-            if not os.path.isdir(outdir_loc):
-                os.mkdir(outdir_loc)
+            if os.path.isdir(outdir_loc):
+                shutil.rmtree(outdir_loc)
+
+            os.mkdir(outdir_loc)
 
         for i in range(n_x_tiles):
             for j in range(n_y_tiles):
                 tile_data = median.sel(
-                    x=median.x[i * tile_size : (i + 1 * tile_size)],
-                    y=median.y[j * tile_size : (j + 1 * tile_size)],
+                    x=median.x[i * tile_size : (i + 1) * tile_size],
+                    y=median.y[j * tile_size : (j + 1) * tile_size],
                 )
                 tile_data["band"] = bands
-                tile_file_loc = os.path.join(outdir_loc, f"tile_{i+1}_{j+1}.tif")
-                tile_data.rio.to_raster(tile_file_loc)
-                
+                tile_file_loc = os.path.join(outdir_loc, f"{catalog_basename}_tile_{i+1}_{j+1}.tif")
+                tile_data.astype('uint16').rio.to_raster(tile_file_loc)
+
         return outdir_loc

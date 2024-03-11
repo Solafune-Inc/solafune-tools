@@ -37,6 +37,22 @@ mosaics_catalog = solafune_tools.create_basemap(
     bands=["B02", "B03", "B04"],
     mosaic_epsg="Auto",
     mosaic_resolution=100,
+    clip_to_aoi=True,
+)
+```
+
+If you want your mosaic broken up into tiles, pass in a tile_size argument (size in pixels). Tiles for the below call will be 100x100 except that the right and bottom boundaries of the mosaic where they maybe rectangular and smaller due to the mosaic not accomodating an integer number of tiles.
+
+```python
+mosaics_catalog = solafune_tools.create_basemap(
+    start_date="2023-05-01",
+    end_date="2023-08-01",
+    aoi_geometry_file="data/geojson/xyz_bounds.geojson",
+    bands=["B02", "B03", "B04"],
+    mosaic_epsg="Auto",
+    mosaic_resolution=100,
+    clip_to_aoi=True,
+    tile_size=100,
 )
 ```
 The output is a link to a STAC catalog of all mosaics generated so far in the current data directory. See point 6 in the workflow below to see how to load and query it.
@@ -72,12 +88,12 @@ local_stac_catalog = solafune_tools.create_local_catalog_from_existing(
     outfile_dir='Auto',
 )
 ```
-4. Make a cloudless mosaic. Make sure to have a Dask cluster running for this step. Otherwise, it will either take days to finish or crash out with memory errors.
+4. Make a cloudless mosaic. Make sure to have a Dask cluster running for this step. Otherwise, it will either take days to finish or crash out with memory errors. Only pass in a geometry file if you want to your mosaic clipped to that geometry.
 
 ```python
 mosaic_file_loc = solafune_tools.create_mosaic(
     local_stac_catalog=local_stac_catalog,
-    aoi_geometry_file="data/geojson/xyz_bounds.geojson",
+    aoi_geometry_file=None,
     outfile_loc='Auto',
     out_epsg='Auto',
     resolution=100,
@@ -86,7 +102,7 @@ mosaic_file_loc = solafune_tools.create_mosaic(
 5. Update the STAC catalog for the mosaics folder.
 ```python
 mosaics_catalog = solafune_tools.create_local_catalog_from_scratch(
-    infile_dir=os.path.dirname(mosaic_file_loc),
+    infile_dir='Auto',
     outfile_loc='Auto'
     )
 ```

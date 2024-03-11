@@ -12,6 +12,8 @@ def create_basemap(
     bands=["B02", "B03", "B04"],
     mosaic_epsg="Auto",
     mosaic_resolution=100,
+    tile_size=None,
+    clip_to_aoi=True,
 ) -> os.PathLike:
     """
     Creates a basemap given a geometry file, date range, bands and output resolution
@@ -33,16 +35,22 @@ def create_basemap(
         outfile_dir="Auto",
     )
 
-    mosaic_file_loc = solafune_tools.make_mosaic.create_mosaic(
+    if clip_to_aoi == True:
+        clip_aoi_file = aoi_geometry_file
+    else:
+        clip_aoi_file = None
+
+    _ = solafune_tools.make_mosaic.create_mosaic(
         local_stac_catalog=local_stac_catalog,
-        aoi_geometry_file=aoi_geometry_file,
+        aoi_geometry_file=clip_aoi_file,
         outfile_loc="Auto",
         out_epsg=mosaic_epsg,
         resolution=mosaic_resolution,
+        tile_size=tile_size,
     )
 
     mosaics_catalog = solafune_tools.make_catalog.create_local_catalog_from_scratch(
-        infile_dir=os.path.dirname(mosaic_file_loc), outfile_loc="Auto"
+        infile_dir="Auto", outfile_loc="Auto"
     )
 
     return mosaics_catalog

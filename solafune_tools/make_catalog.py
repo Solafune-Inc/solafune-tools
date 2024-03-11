@@ -98,16 +98,23 @@ def _get_datetime(path):
 
 
 def create_local_catalog_from_scratch(
-    infile_dir=os.path.join(data_dir, "tif", "mosaic"), outfile_loc="Auto"
+    infile_dir="Auto", outfile_loc="Auto"
 ) -> os.PathLike:
     """Creates a local STAC catalog given a folder of tif files"""
     catalog = pystac.Catalog(
         id="mosaics",
         description="This catalog contains median mosaics created from Sentinel-2 data",
     )
-
-    files = sorted(glob.glob(os.path.join(infile_dir, "*.tif")))
-    for img_path in files:
+    if infile_dir == 'Auto':
+        infile_dir = os.path.join(data_dir, "tif", "mosaic")
+    # files = sorted(glob.glob(os.path.join(infile_dir, "*.tif")))
+    file_paths = []
+    for path, _, files in os.walk(infile_dir):
+        for name in files:
+            file_path = os.path.join(path, name)
+            if os.path.splitext(file_path)[-1] == '.tif':
+                file_paths.append(file_path)
+    for img_path in file_paths:
         bbox, footprint = _get_bbox_and_footprint(img_path)
 
         start_date, end_date = _get_datetime(img_path)

@@ -1,6 +1,6 @@
 [project]
 name = "solafune-tools"
-version = "0.1.14"
+version = "0.1.15"
 description = "Solafune internal geodata management tools"
 authors = [
     {name = "Pushkar Kopparla", email = "pushkar.kopparla@solafune.com"},
@@ -19,6 +19,4 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["solafune_tools"]
-exclude = ["data"]  # alternatively: `exclude = ["additional*"]`
-namespaces = false
+exclude = ["data"]

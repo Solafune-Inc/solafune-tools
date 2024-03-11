@@ -88,10 +88,11 @@ def create_mosaic(
                 "mosaic",
                 catalog_basename,
             )
-            if os.path.isdir(outdir_loc):
-                shutil.rmtree(outdir_loc)
+            
+        if os.path.isdir(outdir_loc):
+            shutil.rmtree(outdir_loc)
 
-            os.mkdir(outdir_loc)
+        os.mkdir(outdir_loc)
 
         for i in range(n_x_tiles):
             for j in range(n_y_tiles):

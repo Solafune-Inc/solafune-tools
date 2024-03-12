@@ -34,7 +34,7 @@ mosaics_catalog = solafune_tools.create_basemap(
     start_date="2023-05-01",
     end_date="2023-08-01",
     aoi_geometry_file="data/geojson/xyz_bounds.geojson",
-    bands=["B02", "B03", "B04"],
+    bands="Auto",
     mosaic_epsg="Auto",
     mosaic_resolution=100,
     clip_to_aoi=True,
@@ -48,12 +48,11 @@ mosaics_catalog = solafune_tools.create_basemap(
     start_date="2023-05-01",
     end_date="2023-08-01",
     aoi_geometry_file="data/geojson/xyz_bounds.geojson",
-    bands=["B02", "B03", "B04"],
+    bands=['B02','B04'],
     mosaic_epsg="Auto",
     mosaic_resolution=100,
     clip_to_aoi=True,
     tile_size=100,
-    bands='Auto',
 )
 ```
 The output is a link to a STAC catalog of all mosaics generated so far in the current data directory. See point 6 in the workflow below to see how to load and query it.

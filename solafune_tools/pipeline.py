@@ -9,7 +9,7 @@ def create_basemap(
     start_date="2023-05-01",
     end_date="2023-08-01",
     aoi_geometry_file=os.path.join("tests", "data-test", "geojson", "sample.geojson"),
-    bands=["B02", "B03", "B04"],
+    bands="Auto",
     mosaic_epsg="Auto",
     mosaic_resolution=100,
     tile_size=None,

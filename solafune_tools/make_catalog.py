@@ -105,14 +105,14 @@ def create_local_catalog_from_scratch(
         id="mosaics",
         description="This catalog contains median mosaics created from Sentinel-2 data",
     )
-    if infile_dir == 'Auto':
-        infile_dir = os.path.join(data_dir, "tif", "mosaic")
+    if infile_dir == "Auto":
+        infile_dir = os.path.join(data_dir, "mosaic")
     # files = sorted(glob.glob(os.path.join(infile_dir, "*.tif")))
     file_paths = []
     for path, _, files in os.walk(infile_dir):
         for name in files:
             file_path = os.path.join(path, name)
-            if os.path.splitext(file_path)[-1] == '.tif':
+            if os.path.splitext(file_path)[-1] == ".tif":
                 file_paths.append(file_path)
     for img_path in file_paths:
         bbox, footprint = _get_bbox_and_footprint(img_path)
@@ -123,7 +123,7 @@ def create_local_catalog_from_scratch(
             transform = list(r.transform)
             shape = r.shape
         with rioxarray.open_rasterio(img_path) as ds:
-            bands = list(ds.band.data.astype("str"))
+            bands = list(ds.long_name)
         item = pystac.Item(
             id=os.path.splitext(os.path.basename(img_path))[0],
             geometry=footprint,

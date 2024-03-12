@@ -47,6 +47,7 @@ def create_basemap(
         out_epsg=mosaic_epsg,
         resolution=mosaic_resolution,
         tile_size=tile_size,
+        bands=bands,
     )
 
     mosaics_catalog = solafune_tools.make_catalog.create_local_catalog_from_scratch(

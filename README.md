@@ -41,7 +41,7 @@ mosaics_catalog = solafune_tools.create_basemap(
 )
 ```
 
-If you want your mosaic broken up into tiles, pass in a tile_size argument (size in pixels). Tiles for the below call will be 100x100 except that the right and bottom boundaries of the mosaic where they maybe rectangular and smaller due to the mosaic not accomodating an integer number of tiles.
+If you want your mosaic broken up into tiles, pass in a tile_size argument (size in pixels). Tiles for the below call will be 100x100 except that the right and bottom boundaries of the mosaic where they maybe rectangular and smaller due to the mosaic not accomodating an integer number of tiles. You can also pass a list for bands like `bands = ['B02','B04']` if you want to select only certain bands to make a mosaic.
 
 ```python
 mosaics_catalog = solafune_tools.create_basemap(
@@ -53,6 +53,7 @@ mosaics_catalog = solafune_tools.create_basemap(
     mosaic_resolution=100,
     clip_to_aoi=True,
     tile_size=100,
+    bands='Auto',
 )
 ```
 The output is a link to a STAC catalog of all mosaics generated so far in the current data directory. See point 6 in the workflow below to see how to load and query it.
@@ -97,6 +98,7 @@ mosaic_file_loc = solafune_tools.create_mosaic(
     outfile_loc='Auto',
     out_epsg='Auto',
     resolution=100,
+    bands='Auto',
 )
 ```
 5. Update the STAC catalog for the mosaics folder.

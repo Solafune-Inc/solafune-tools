@@ -1,9 +1,12 @@
 # import geopandas
-import solafune_tools
+import time
+
 import planetary_computer
 import pystac_client
-import time
 import pytest
+
+import solafune_tools
+
 # import os
 
 # @pytest.fixture()

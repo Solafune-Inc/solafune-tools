@@ -42,6 +42,19 @@ def create_local_catalog_from_existing(
     """
     Update a downloaded Planetary Computer STAC catalog geoparquet file into a
     local STAC catalog for stacking and mosaicking using the library stackstac
+
+    Parameters
+    ----------
+    input_catalog_parquet : str | path
+                            Location of downloaded catalog of remote files in
+                            parquet format
+    bands : list(str)
+            list of bands for which files were downloaded
+    tif_files_dir : str | path
+                    Directory where downloaded files were stored.
+    outfile_dir : str | path
+                  Location where to store the local stac catalog
+                  in json format
     """
     if outfile_dir == "Auto":
         outfile_dir = os.path.join(
@@ -100,10 +113,23 @@ def _get_datetime(path):
 def create_local_catalog_from_scratch(
     infile_dir="Auto", outfile_loc="Auto"
 ) -> os.PathLike:
-    """Creates a local STAC catalog given a folder of tif files"""
+    """
+    Creates a local STAC catalog given a folder of tif files. Primarily
+    used to catalog the repository of newly created mosaics.
+
+    Parameters
+    ----------
+    infile_dir : str | path
+                Location of tif file directory to be cataloged. 'Auto' points
+                to the mosaic subdir in the data directory.
+    outfiledir : str | path
+                 Location where catalog will be stored. 'Auto' defaults to
+                 'data/stac/mosaic/catalog.json`
+    """
     catalog = pystac.Catalog(
         id="mosaics",
-        description="This catalog contains median mosaics created from Sentinel-2 data",
+        description="This catalog contains median mosaics created from Sentinel-2 data \
+        using solafune_tools",
     )
     if infile_dir == "Auto":
         infile_dir = os.path.join(data_dir, "mosaic")

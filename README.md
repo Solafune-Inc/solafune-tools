@@ -9,7 +9,7 @@ Install the package using `pip` or `uv pip`, recommend using `python 3.10`:
 ``` 
 uv pip install solafune_tools
 ```
-
+All public-facing functions have detailed docstrings explanining their expected inputs and outputs. You can check any of them through `print(solafune_tools.function_name.__doc__)` (if you don't use print it shows as an unstructured string) or `??solafune_tools.function_name` in jupyter notebooks.
 Before using the library, you can set the directory where you want to store data by calling
 ```
 solafune_tools.set_data_directory(dir_path="your_data_dir_here")
@@ -41,7 +41,7 @@ mosaics_catalog = solafune_tools.create_basemap(
 )
 ```
 
-If you want your mosaic broken up into tiles, pass in a tile_size argument (size in pixels). Tiles for the below call will be 100x100 except that the right and bottom boundaries of the mosaic where they maybe rectangular and smaller due to the mosaic not accomodating an integer number of tiles. You can also pass a list for bands like `bands = ['B02','B04']` if you want to select only certain bands to make a mosaic.
+If you want your mosaic broken up into tiles, pass in a tile_size argument (size in pixels). Tiles for the below call will be 100x100 except that the right and bottom boundaries of the mosaic where they maybe rectangular and smaller due to the mosaic not accomodating an integer number of tiles. You can also pass a list for bands like `bands = ['B02','B04']` if you want to select only certain bands to make a mosaic. Further, you can choose to make several single band mosaics or a multiband mosaic by passing in `Singleband` or `Multiband` to this function.
 
 ```python
 mosaics_catalog = solafune_tools.create_basemap(
@@ -53,6 +53,7 @@ mosaics_catalog = solafune_tools.create_basemap(
     mosaic_resolution=100,
     clip_to_aoi=True,
     tile_size=100,
+    mosaic_style='Multiband',
 )
 ```
 The output is a link to a STAC catalog of all mosaics generated so far in the current data directory. See point 6 in the workflow below to see how to load and query it.
@@ -98,6 +99,7 @@ mosaic_file_loc = solafune_tools.create_mosaic(
     out_epsg='Auto',
     resolution=100,
     bands='Auto',
+    mosaic_style='Multiband'
 )
 ```
 5. Update the STAC catalog for the mosaics folder.

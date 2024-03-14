@@ -1,16 +1,18 @@
+import json
 import logging
+import math
 import os
 import shutil
 from statistics import mode
-import json
+
 import pystac
 
 # even though rioxarray is not explicitly used,
 # it is needed for rio.to_raster on xarray dataarray
 import rioxarray
 import stackstac
-import math
 import xarray
+
 import solafune_tools.settings
 
 data_dir = solafune_tools.settings.get_data_directory()
@@ -52,6 +54,7 @@ def create_mosaic(
     resolution=100,
     tile_size=None,
     bands="Auto",
+    mosaic_style="Multiband",
 ):
     """
     Creates a median mosaic from a STAC catalog given a target epsg
@@ -67,7 +70,25 @@ def create_mosaic(
                          tif files
     aoi_geometry_file : str | path
                         geometry to clip mosaic to, defaults to None
-
+    outfile_loc : str | path
+                  location where to write out the mosiac. 'Auto' will write to
+                  the mosaic subdir in the data directory. If tile_size is not
+                  None, this loc becomes a directory where the tiles are stored.
+    out_epsg : int
+              crs value for the output mosaic. 'Auto' defaults to the most
+              common epsg value among the input files.
+    resolution : resolution per pixel for the output data. This is in units of the
+                crs. For Sentinel-2 data, this is meters. If you use epsg:4326, it
+                will be degrees so be careful.
+    tile_size : int
+                Size of square tiles in pixels for mosiac output. If none, a
+                single large tif file is written out.
+    bands : str | list(str)
+           Pass in a list of bands for which you need mosaics. If Auto, all bands
+           are used.
+    mosaic_style : 'Singleband' | 'Multiband''
+                    Whether a single multiband mosaic is needed or individual
+                    mosaics for every band
 
     """
     logging.warning(
@@ -115,34 +136,58 @@ def create_mosaic(
     else:
         n_x_tiles = math.ceil(len(median.x) / tile_size)
         n_y_tiles = math.ceil(len(median.y) / tile_size)
+        catalog_basename = os.path.split(os.path.dirname(local_stac_catalog))[-1]
 
         if outfile_loc == "Auto":
-            catalog_basename = os.path.split(os.path.dirname(local_stac_catalog))[-1]
             outdir_loc = os.path.join(
                 data_dir,
                 "mosaic",
                 catalog_basename,
             )
+        else:
+            outdir_loc = outfile_loc
 
         if os.path.isdir(outdir_loc):
             shutil.rmtree(outdir_loc)
 
         os.mkdir(outdir_loc)
-
-        for i in range(n_x_tiles):
-            for j in range(n_y_tiles):
-                tile_data = median.sel(
-                    x=median.x[i * tile_size : (i + 1) * tile_size],
-                    y=median.y[j * tile_size : (j + 1) * tile_size],
-                )
-                # tile_data["band"] = bands
-                band_ids = "_".join(bands)
-                tile_file_loc = os.path.join(
-                    outdir_loc, f"{catalog_basename}_{band_ids}_tile_{i+1}_{j+1}.tif"
-                )
-                # tile_data.astype('uint16').rio.to_raster(tile_file_loc)
-                _write_to_file(
-                    bands=bands, dataarray=tile_data, outfile_loc=tile_file_loc
-                )
+        if mosaic_style == "Multiband":
+            for i in range(n_x_tiles):
+                for j in range(n_y_tiles):
+                    tile_data = median.sel(
+                        x=median.x[i * tile_size : (i + 1) * tile_size],
+                        y=median.y[j * tile_size : (j + 1) * tile_size],
+                    )
+                    # tile_data["band"] = bands
+                    band_ids = "_".join(bands)
+                    tile_file_loc = os.path.join(
+                        outdir_loc,
+                        f"{catalog_basename}_{band_ids}_tile_{i+1}_{j+1}.tif",
+                    )
+                    _write_to_file(
+                        bands=bands, dataarray=tile_data, outfile_loc=tile_file_loc
+                    )
+        elif mosaic_style == "Singleband":
+            for i in range(n_x_tiles):
+                for j in range(n_y_tiles):
+                    for band in bands:
+                        tile_data = median.sel(
+                            x=median.x[i * tile_size : (i + 1) * tile_size],
+                            y=median.y[j * tile_size : (j + 1) * tile_size],
+                            band=band,
+                        )
+                        # tile_data["band"] = bands
+                        tile_file_loc = os.path.join(
+                            outdir_loc,
+                            f"{catalog_basename}_{band}_tile_{i+1}_{j+1}.tif",
+                        )
+                        _write_to_file(
+                            bands=band, dataarray=tile_data, outfile_loc=tile_file_loc
+                        )
+        else:
+            raise ValueError(
+                "Please use either 'Multiband' or 'Singleband' \
+                         only for the parameter 'mosaic_style'"
+            )
 
         return outdir_loc

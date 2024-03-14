@@ -109,6 +109,16 @@ def planetary_computer_fetch_images(
     """
     Iterates over assets in a catalog in geoparquet file and downloads
     selected bands.
+
+    Parameters
+    ----------
+    dataframe_path : str | path
+                     location of the stac catalog parquet file
+    bands : list(str)
+            selection of bands to download
+    outfile_dir : str | path
+                  location where to write out the downloaded tif files.
+                  'Auto' will write to the tif subdir in the data directory.
     """
     gdf = filter_redundant_items(gpd.read_parquet(dataframe_path))
     assets = gdf.assets
@@ -162,6 +172,19 @@ def planetary_computer_stac_query(
     """
     Downloads a STAC catalog for a given geometry and daterange and saves
     it to a geoparquet file.
+
+    Parameters
+    ----------
+    start_date : str of format YYYY-MM-DD
+                start date for period of interest
+    end_date : str of format YYYY-MM-DD
+              end date for period of interest
+    aoi_geometry_file : str | path
+                        geometry to clip mosaic to, defaults to a sample
+                        test geojson over Kolwezi, Southern DRC
+    outfile_name : str | path
+                   location where to write out the catalog in parquet format.
+                   'Auto' will write to the parquet subdir in the data directory.
     """
     catalog = pystac_client.Client.open(
         "https://planetarycomputer.microsoft.com/api/stac/v1",

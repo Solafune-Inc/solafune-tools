@@ -116,12 +116,14 @@ def create_mosaic(
             data = json.load(f)
         area_of_interest = data["features"][0]["geometry"]
         median = median.rio.clip(geometries=[area_of_interest], crs=4326)
+    
+    catalog_basename = os.path.split(os.path.dirname(local_stac_catalog))[-1]
 
     if tile_size == None:
         outval = median.compute()
         if outfile_loc == "Auto":
             outfile_basename = (
-                os.path.split(os.path.dirname(local_stac_catalog))[-1]
+                catalog_basename
                 + "_".join(bands)
                 + ".tif"
             )
@@ -136,7 +138,6 @@ def create_mosaic(
     else:
         n_x_tiles = math.ceil(len(median.x) / tile_size)
         n_y_tiles = math.ceil(len(median.y) / tile_size)
-        catalog_basename = os.path.split(os.path.dirname(local_stac_catalog))[-1]
 
         if outfile_loc == "Auto":
             outdir_loc = os.path.join(
@@ -170,19 +171,18 @@ def create_mosaic(
         elif mosaic_style == "Singleband":
             for i in range(n_x_tiles):
                 for j in range(n_y_tiles):
+                    tile_data = median.sel(
+                        x=median.x[i * tile_size : (i + 1) * tile_size],
+                        y=median.y[j * tile_size : (j + 1) * tile_size],
+                    )
+                    # tile_data["band"] = bands
                     for band in bands:
-                        tile_data = median.sel(
-                            x=median.x[i * tile_size : (i + 1) * tile_size],
-                            y=median.y[j * tile_size : (j + 1) * tile_size],
-                            band=band,
-                        )
-                        # tile_data["band"] = bands
                         tile_file_loc = os.path.join(
                             outdir_loc,
                             f"{catalog_basename}_{band}_tile_{i+1}_{j+1}.tif",
                         )
                         _write_to_file(
-                            bands=band, dataarray=tile_data, outfile_loc=tile_file_loc
+                            bands=[band], dataarray=tile_data, outfile_loc=tile_file_loc
                         )
         else:
             raise ValueError(

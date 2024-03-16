@@ -4,6 +4,7 @@ import math
 import os
 import shutil
 from statistics import mode
+from importlib.metadata import version
 
 import pystac
 
@@ -39,6 +40,7 @@ def _write_to_file(bands, dataarray, outfile_loc):
             },
             attrs={
                 "long_name": band,
+                "solafune_tools_ver": version("solafune_tools")
             },
         )
     ds = ds.assign_attrs(dataarray.attrs)

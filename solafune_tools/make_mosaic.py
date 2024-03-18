@@ -37,6 +37,7 @@ def _write_to_file(bands, dataarray, outfile_loc):
             coords={
                 "x": dataarray.x,
                 "y": dataarray.y,
+                "spatial_ref": dataarray.spatial_ref,
             },
             attrs={
                 "long_name": band,

@@ -167,6 +167,7 @@ def planetary_computer_stac_query(
     start_date="2023-05-01",
     end_date="2023-08-01",
     aoi_geometry_file=os.path.join("tests", "data-test", "geojson", "sample.geojson"),
+    kwargs_dict=None,
     outfile_name="Auto",
 ) -> os.PathLike:
     """
@@ -182,6 +183,10 @@ def planetary_computer_stac_query(
     aoi_geometry_file : str | path
                         geometry to clip mosaic to, defaults to a sample
                         test geojson over Kolwezi, Southern DRC
+    kwargs_dict : dict
+                  pass in keyword arguments to filter your item search,
+                  refer to planetary computer filter fields. eg.,
+                  {"eo:cloud_cover": {"lt": 10}, "s2:nodata_pixel_percentage": {"lt":20}}
     outfile_name : str | path
                    location where to write out the catalog in parquet format.
                    'Auto' will write to the parquet subdir in the data directory.
@@ -199,7 +204,7 @@ def planetary_computer_stac_query(
         collections=["sentinel-2-l2a"],
         intersects=area_of_interest,
         datetime=time_of_interest,
-        # query={"eo:cloud_cover": {"lt": 10}, "s2:nodata_pixel_percentage": {"lt":20}},
+        query=kwargs_dict,
     )
 
     items = search.item_collection()

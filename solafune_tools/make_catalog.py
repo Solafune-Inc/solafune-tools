@@ -149,7 +149,7 @@ def create_local_catalog_from_scratch(
             transform = list(r.transform)
             shape = r.shape
         with rioxarray.open_rasterio(img_path) as ds:
-            bands = list(ds.long_name)
+            bands = list(ds.long_name) if type(ds.long_name) == tuple else list([ds.long_name])
         item = pystac.Item(
             id=os.path.splitext(os.path.basename(img_path))[0],
             geometry=footprint,

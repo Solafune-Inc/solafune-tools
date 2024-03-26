@@ -34,6 +34,7 @@ mosaics_catalog = solafune_tools.create_basemap(
     start_date="2023-05-01",
     end_date="2023-08-01",
     aoi_geometry_file="data/geojson/xyz_bounds.geojson",
+    kwargs_dict={"eo:cloud_cover": {"lt": 10}, "s2:nodata_pixel_percentage": {"lt":20}},
     bands="Auto",
     mosaic_epsg="Auto",
     mosaic_resolution=100,
@@ -41,7 +42,7 @@ mosaics_catalog = solafune_tools.create_basemap(
 )
 ```
 
-If you want your mosaic broken up into tiles, pass in a tile_size argument (size in pixels). Tiles for the below call will be 100x100 except that the right and bottom boundaries of the mosaic where they maybe rectangular and smaller due to the mosaic not accomodating an integer number of tiles. You can also pass a list for bands like `bands = ['B02','B04']` if you want to select only certain bands to make a mosaic. Further, you can choose to make several single band mosaics or a multiband mosaic by passing in `Singleband` or `Multiband` to this function.
+You can pass in planetary computer query fields as keyword arguments to apply them as filters on your item queries. If you want your mosaic broken up into tiles, pass in a tile_size argument (size in pixels). Tiles for the below call will be 100x100 except that the right and bottom boundaries of the mosaic where they maybe rectangular and smaller due to the mosaic not accomodating an integer number of tiles. You can also pass a list for bands like `bands = ['B02','B04']` if you want to select only certain bands to make a mosaic. Further, you can choose to make several single band mosaics or a multiband mosaic by passing in `Singleband` or `Multiband` to this function.
 
 ```python
 mosaics_catalog = solafune_tools.create_basemap(
@@ -66,6 +67,7 @@ plc_stac_catalog = solafune_tools.planetary_computer_stac_query(
     start_date="2023-05-01",
     end_date="2023-08-01",
     aoi_geometry_file= "data/geojson/xyz_bounds.geojson",
+    kwargs_dict={"eo:cloud_cover": {"lt": 10}, "s2:nodata_pixel_percentage": {"lt":20}},
     outfile_name='Auto'
 )
 ```

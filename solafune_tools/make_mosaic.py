@@ -30,15 +30,26 @@ def _get_most_common_epsg(items):
 def _write_to_file(bands, dataarray, outfile_loc):
     """Writes raster to file with band name in metadata"""
     ds = xarray.Dataset()
-    for count, band in enumerate(bands):
-        ds[band] = xarray.DataArray(
-            dataarray.isel(band=count),
-            dims=("y", "x"),
-            coords={
+    # code below is for an issue with Windows vs Linux
+    # without explicit copy spatial_ref doesn't transfer
+    # on Windows. On Linux, spatial_ref cannot be explicitly
+    # accessed and raises AttributeError
+    try:
+        coords_dict = {
                 "x": dataarray.x,
                 "y": dataarray.y,
                 "spatial_ref": dataarray.spatial_ref,
-            },
+        }
+    except AttributeError:
+        coords_dict = {
+                "x": dataarray.x,
+                "y": dataarray.y,
+        }
+    for band in bands:
+        ds[band] = xarray.DataArray(
+            dataarray.sel(band=band),
+            dims=("y", "x"),
+            coords=coords_dict,
             attrs={
                 "long_name": band,
                 "solafune_tools_ver": version("solafune_tools")

@@ -34,8 +34,8 @@ def create_basemap(
     mosaic_epsg : int
               crs value for the output mosaic. 'Auto' defaults to the most
               common epsg value among the input files.
-    mosaic_resolution : resolution per pixel for the output data. This is in units 
-                        of the crs. For Sentinel-2 data, this is meters. If you use 
+    mosaic_resolution : resolution per pixel for the output data. This is in units
+                        of the crs. For Sentinel-2 data, this is meters. If you use
                         epsg:4326, it will be degrees so be careful.
     tile_size : int
                 Size of square tiles in pixels for mosiac output. If none, a
@@ -62,8 +62,8 @@ def create_basemap(
         outfile_dir="Auto",
     )
 
-    clip_aoi_file = aoi_geometry_file if clip_to_aoi == True else None
- 
+    clip_aoi_file = aoi_geometry_file if clip_to_aoi is True else None
+
     _ = solafune_tools.make_mosaic.create_mosaic(
         local_stac_catalog=local_stac_catalog,
         aoi_geometry_file=clip_aoi_file,

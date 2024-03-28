@@ -3,11 +3,10 @@ import logging
 import math
 import os
 import shutil
-from statistics import mode
 from importlib.metadata import version
+from statistics import mode
 
 import pystac
-
 # even though rioxarray is not explicitly used,
 # it is needed for rio.to_raster on xarray dataarray
 import rioxarray
@@ -15,8 +14,6 @@ import stackstac
 import xarray
 
 import solafune_tools.settings
-
-data_dir = solafune_tools.settings.get_data_directory()
 
 
 def _get_most_common_epsg(items):
@@ -36,24 +33,21 @@ def _write_to_file(bands, dataarray, outfile_loc):
     # accessed and raises AttributeError
     try:
         coords_dict = {
-                "x": dataarray.x,
-                "y": dataarray.y,
-                "spatial_ref": dataarray.spatial_ref,
+            "x": dataarray.x,
+            "y": dataarray.y,
+            "spatial_ref": dataarray.spatial_ref,
         }
     except AttributeError:
         coords_dict = {
-                "x": dataarray.x,
-                "y": dataarray.y,
+            "x": dataarray.x,
+            "y": dataarray.y,
         }
     for band in bands:
         ds[band] = xarray.DataArray(
             dataarray.sel(band=band),
             dims=("y", "x"),
             coords=coords_dict,
-            attrs={
-                "long_name": band,
-                "solafune_tools_ver": version("solafune_tools")
-            },
+            attrs={"long_name": band, "solafune_tools_ver": version("solafune_tools")},
         )
     ds = ds.assign_attrs(dataarray.attrs)
     ds.astype("uint16").rio.to_raster(outfile_loc)
@@ -61,7 +55,9 @@ def _write_to_file(bands, dataarray, outfile_loc):
 
 
 def create_mosaic(
-    local_stac_catalog=os.path.join(data_dir, "stac", "catalog.json"),
+    local_stac_catalog=os.path.join(
+        solafune_tools.settings.get_data_directory(), "stac", "catalog.json"
+    ),
     aoi_geometry_file=None,
     outfile_loc="Auto",
     out_epsg="Auto",
@@ -125,22 +121,19 @@ def create_mosaic(
         .median(dim="time", skipna=True)
     )
 
-    if aoi_geometry_file != None:
+    if aoi_geometry_file is not None:
         with open(aoi_geometry_file) as f:
             data = json.load(f)
         area_of_interest = data["features"][0]["geometry"]
         median = median.rio.clip(geometries=[area_of_interest], crs=4326)
-    
+
     catalog_basename = os.path.split(os.path.dirname(local_stac_catalog))[-1]
 
-    if tile_size == None:
+    if tile_size is None:
         outval = median.compute()
         if outfile_loc == "Auto":
-            outfile_basename = (
-                catalog_basename
-                + "_".join(bands)
-                + ".tif"
-            )
+            outfile_basename = catalog_basename + "_".join(bands) + ".tif"
+            data_dir = solafune_tools.settings.get_data_directory()
             outfile_loc = os.path.join(data_dir, "mosaic", outfile_basename)
         if not os.path.isdir(os.path.dirname(outfile_loc)):
             os.mkdir(os.path.dirname(outfile_loc))
@@ -154,6 +147,7 @@ def create_mosaic(
         n_y_tiles = math.ceil(len(median.y) / tile_size)
 
         if outfile_loc == "Auto":
+            data_dir = solafune_tools.settings.get_data_directory()
             outdir_loc = os.path.join(
                 data_dir,
                 "mosaic",

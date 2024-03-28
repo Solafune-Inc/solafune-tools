@@ -17,8 +17,6 @@ import solafune_tools.settings
 logging.basicConfig(level=logging.INFO)
 PIL.Image.MAX_IMAGE_PIXELS = 2e8
 
-data_dir = solafune_tools.settings.get_data_directory()
-
 
 def _log(func):
     """Decorator that logs the runtime of a function"""
@@ -38,6 +36,7 @@ def _check_downloaded_file(file_path, raw_file_name) -> bool:
     try:
         Image.open(file_path)
     except Exception as e:
+        data_dir = solafune_tools.settings.get_data_directory()
         with open(os.path.join(data_dir, "logs/bad_responses.txt"), "a") as logfile:
             logfile.write(f"{os.path.basename(file_path)} {raw_file_name} {e}\n")
         return False
@@ -59,6 +58,7 @@ def _download_tiff(raw_file_name, outfile_dir, session) -> int:
             for chunk in response.iter_content(chunk_size=10 * 1024):
                 dest_file.write(chunk)
     else:
+        data_dir = solafune_tools.settings.get_data_directory()
         with open(os.path.join(data_dir, "logs/bad_responses.txt"), "a") as logfile:
             logfile.write(f"{response.status_code} {raw_file_name}\n")
 
@@ -102,7 +102,10 @@ def filter_redundant_items(dataframe) -> gpd.GeoDataFrame:
 
 @_log
 def planetary_computer_fetch_images(
-    dataframe_path=os.path.join(data_dir, "parquet/2023_May_July_CuCoBounds.parquet"),
+    dataframe_path=os.path.join(
+        solafune_tools.settings.get_data_directory(),
+        "parquet/2023_May_July_CuCoBounds.parquet",
+    ),
     bands=["B02", "B03", "B04"],
     outfile_dir="Auto",
 ) -> os.PathLike:
@@ -123,6 +126,7 @@ def planetary_computer_fetch_images(
     gdf = filter_redundant_items(gpd.read_parquet(dataframe_path))
     assets = gdf.assets
     if outfile_dir == "Auto":
+        data_dir = solafune_tools.settings.get_data_directory()
         outfile_dir = os.path.join(
             data_dir, "tif", os.path.splitext(os.path.basename(dataframe_path))[0]
         )
@@ -157,6 +161,7 @@ def _make_parquet_filename(start_date, end_date, aoi_geometry_file) -> os.PathLi
         + base_geometry_name
         + ".parquet"
     )
+    data_dir = solafune_tools.settings.get_data_directory()
     parq_dir = os.path.join(data_dir, "parquet")
     if not os.path.isdir(parq_dir):
         os.mkdir(parq_dir)
@@ -208,6 +213,8 @@ def planetary_computer_stac_query(
     )
 
     items = search.item_collection()
+    if len(items) == 0:
+        sys.exit("No satellite data items were found for your search parameters")
     item_list = [item.to_dict() for item in items]
     df = stac_geoparquet.to_geodataframe(item_list)
     if outfile_name == "Auto":

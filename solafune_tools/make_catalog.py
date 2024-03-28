@@ -1,4 +1,3 @@
-import glob
 import os
 from datetime import datetime
 
@@ -11,8 +10,6 @@ from shapely.geometry import Polygon, mapping
 
 import solafune_tools.image_fetcher
 import solafune_tools.settings
-
-data_dir = solafune_tools.settings.get_data_directory()
 
 
 def _get_local_filename(tif_dir, band, remote_href):
@@ -32,11 +29,9 @@ def _local_file_links_update(row, bands, tif_dir):
 
 
 def create_local_catalog_from_existing(
-    input_catalog_parquet=os.path.join(
-        data_dir, "parquet/2023_May_July_CuCoBounds.parquet"
-    ),
+    input_catalog_parquet,
     bands=["B04", "B03", "B02"],
-    tif_files_dir=os.path.join(data_dir, "tif/"),
+    tif_files_dir=os.path.join(solafune_tools.settings.get_data_directory(), "tif/"),
     outfile_dir="Auto",
 ):
     """
@@ -57,6 +52,7 @@ def create_local_catalog_from_existing(
                   in json format
     """
     if outfile_dir == "Auto":
+        data_dir = solafune_tools.settings.get_data_directory()
         outfile_dir = os.path.join(
             data_dir,
             "stac",
@@ -132,6 +128,7 @@ def create_local_catalog_from_scratch(
         using solafune_tools",
     )
     if infile_dir == "Auto":
+        data_dir = solafune_tools.settings.get_data_directory()
         infile_dir = os.path.join(data_dir, "mosaic")
     # files = sorted(glob.glob(os.path.join(infile_dir, "*.tif")))
     file_paths = []
@@ -149,7 +146,11 @@ def create_local_catalog_from_scratch(
             transform = list(r.transform)
             shape = r.shape
         with rioxarray.open_rasterio(img_path) as ds:
-            bands = list(ds.long_name) if type(ds.long_name) == tuple else list([ds.long_name])
+            bands = (
+                list(ds.long_name)
+                if type(ds.long_name) == tuple
+                else list([ds.long_name])
+            )
         item = pystac.Item(
             id=os.path.splitext(os.path.basename(img_path))[0],
             geometry=footprint,
@@ -174,6 +175,7 @@ def create_local_catalog_from_scratch(
         )
         catalog.add_item(item)
     if outfile_loc == "Auto":
+        data_dir = solafune_tools.settings.get_data_directory()
         outfile_loc = os.path.abspath(os.path.join(data_dir, "stac", "mosaic"))
     catalog.normalize_hrefs(outfile_loc)
     try:
@@ -185,7 +187,9 @@ def create_local_catalog_from_scratch(
 
 
 def get_catalog_items_as_gdf(
-    file_path: str | os.PathLike = os.path.join(data_dir, "stac/catalog.json"),
+    file_path: str | os.PathLike = os.path.join(
+        solafune_tools.settings.get_data_directory(), "stac/catalog.json"
+    ),
 ) -> gpd.GeoDataFrame:
     """Loads a STAC catalog as a geopandas GeoDataFrame"""
     catalog = pystac.Catalog.from_file(file_path)

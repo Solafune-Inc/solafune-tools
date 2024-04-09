@@ -1,5 +1,5 @@
 <h1 align="center">
-<img src="https://solafune-contents.s3.ap-northeast-1.amazonaws.com/Solafune_logo_2.001.jpeg" width="300">
+<img src="https://solafune-contents.s3.ap-northeast-1.amazonaws.com/Solafune+Tools+Logo.png" width="300">
 </h1><br>
 
 ### solafune_tools: Internal Geodata Creation and Management Tools

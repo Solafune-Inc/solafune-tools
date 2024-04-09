@@ -1,3 +1,7 @@
+<h1 align="center">
+<img src="https://solafune-contents.s3.ap-northeast-1.amazonaws.com/Solafune_logo_2.001.jpeg" width="300">
+</h1><br>
+
 ### solafune_tools: Internal Geodata Creation and Management Tools
 
 This package contains tools to download STAC catalogs and Sentinel-2 imagery from Planetary Computer and assembling it into a cloudless mosaic. Other tools will be added in the future.

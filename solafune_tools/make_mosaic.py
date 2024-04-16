@@ -7,6 +7,7 @@ from importlib.metadata import version
 from statistics import mode
 
 import pystac
+
 # even though rioxarray is not explicitly used,
 # it is needed for rio.to_raster on xarray dataarray
 import rioxarray

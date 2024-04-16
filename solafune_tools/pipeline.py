@@ -9,6 +9,7 @@ def create_basemap(
     start_date="2023-05-01",
     end_date="2023-08-01",
     aoi_geometry_file=os.path.join("tests", "data-test", "geojson", "sample.geojson"),
+    kwargs_dict=None,
     bands="Auto",
     mosaic_epsg="Auto",
     mosaic_resolution=100,
@@ -28,6 +29,9 @@ def create_basemap(
     aoi_geometry_file : str | path
                         geometry to clip mosaic to, defaults to a sample
                         test geojson over Kolwezi, Southern DRC
+    kwargs_dict : Dict
+                Keyword arguments for search filtering on planetary computer,
+                such as cloud cover or no data.
     bands : str | list(str)
         Pass in a list of bands for which you need mosaics. If Auto, all bands
         are used.
@@ -46,7 +50,10 @@ def create_basemap(
                     mosaics for every band
     """
     plc_stac_catalog = solafune_tools.image_fetcher.planetary_computer_stac_query(
-        start_date=start_date, end_date=end_date, aoi_geometry_file=aoi_geometry_file
+        start_date=start_date,
+        end_date=end_date,
+        aoi_geometry_file=aoi_geometry_file,
+        kwargs_dict=kwargs_dict,
     )
 
     tiffile_dir = solafune_tools.image_fetcher.planetary_computer_fetch_images(

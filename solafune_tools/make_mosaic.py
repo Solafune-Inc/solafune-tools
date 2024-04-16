@@ -65,6 +65,7 @@ def create_mosaic(
     tile_size=None,
     bands="Auto",
     mosaic_style="Multiband",
+    mosaic_mode="Median",
 ):
     """
     Creates a median mosaic from a STAC catalog given a target epsg
@@ -96,15 +97,24 @@ def create_mosaic(
     bands : str | list(str)
            Pass in a list of bands for which you need mosaics. If Auto, all bands
            are used.
-    mosaic_style : 'Singleband' | 'Multiband''
+    mosaic_style : 'Singleband' | 'Multiband'
                     Whether a single multiband mosaic is needed or individual
                     mosaics for every band
+    mosaic_mode : 'Median' | 'Minimum'
+                   Which function to use to generate a mosaic pixel from the image 
+                   stack
 
     """
     logging.warning(
         "!!! Make sure a Dask server is running and accessible."
         " If not, stop the execution of the mosaicking function and start one !!!"
     )
+
+    if mosaic_mode not in ["Median", "Minimum"]:
+        raise ValueError(
+                "Please use either 'Median' or 'Minimum' only for the parameter 'mosaic_mode'"
+            )
+
     catalog = pystac.Catalog.from_file(local_stac_catalog)
     items = list(catalog.get_items(recursive=True))
     if out_epsg == "Auto":
@@ -114,23 +124,32 @@ def create_mosaic(
         bands = list(items[0].assets.keys())
 
     stack = stackstac.stack(items, epsg=out_epsg, resolution=resolution)
-    median = (
-        stack.dropna(dim="time", how="all")
-        .sel(band=bands)
-        .groupby("band")
-        .median(dim="time", skipna=True)
-    )
+
+    if mosaic_mode == 'Median':
+        mosiac = (
+            stack.dropna(dim="time", how="all")
+            .sel(band=bands)
+            .groupby("band")
+            .median(dim="time", skipna=True)
+        )
+    else:
+        mosiac = (
+            stack.dropna(dim="time", how="all")
+            .sel(band=bands)
+            .groupby("band")
+            .min(dim="time", skipna=True)
+        )
 
     if aoi_geometry_file is not None:
         with open(aoi_geometry_file) as f:
             data = json.load(f)
         area_of_interest = data["features"][0]["geometry"]
-        median = median.rio.clip(geometries=[area_of_interest], crs=4326)
+        mosiac = mosiac.rio.clip(geometries=[area_of_interest], crs=4326)
 
     catalog_basename = os.path.split(os.path.dirname(local_stac_catalog))[-1]
 
     if tile_size is None:
-        outval = median.compute()
+        outval = mosiac.compute()
         if outfile_loc == "Auto":
             outfile_basename = catalog_basename + "_".join(bands) + ".tif"
             data_dir = solafune_tools.settings.get_data_directory()
@@ -143,8 +162,8 @@ def create_mosaic(
         return outfile_loc
 
     else:
-        n_x_tiles = math.ceil(len(median.x) / tile_size)
-        n_y_tiles = math.ceil(len(median.y) / tile_size)
+        n_x_tiles = math.ceil(len(mosiac.x) / tile_size)
+        n_y_tiles = math.ceil(len(mosiac.y) / tile_size)
 
         if outfile_loc == "Auto":
             data_dir = solafune_tools.settings.get_data_directory()
@@ -163,9 +182,9 @@ def create_mosaic(
         if mosaic_style == "Multiband":
             for i in range(n_x_tiles):
                 for j in range(n_y_tiles):
-                    tile_data = median.sel(
-                        x=median.x[i * tile_size : (i + 1) * tile_size],
-                        y=median.y[j * tile_size : (j + 1) * tile_size],
+                    tile_data = mosiac.sel(
+                        x=mosiac.x[i * tile_size : (i + 1) * tile_size],
+                        y=mosiac.y[j * tile_size : (j + 1) * tile_size],
                     )
                     # tile_data["band"] = bands
                     band_ids = "_".join(bands)
@@ -179,9 +198,9 @@ def create_mosaic(
         elif mosaic_style == "Singleband":
             for i in range(n_x_tiles):
                 for j in range(n_y_tiles):
-                    tile_data = median.sel(
-                        x=median.x[i * tile_size : (i + 1) * tile_size],
-                        y=median.y[j * tile_size : (j + 1) * tile_size],
+                    tile_data = mosiac.sel(
+                        x=mosiac.x[i * tile_size : (i + 1) * tile_size],
+                        y=mosiac.y[j * tile_size : (j + 1) * tile_size],
                     )
                     # tile_data["band"] = bands
                     for band in bands:

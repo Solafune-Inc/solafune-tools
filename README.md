@@ -46,7 +46,7 @@ mosaics_catalog = solafune_tools.create_basemap(
 )
 ```
 
-You can pass in planetary computer query fields as keyword arguments to apply them as filters on your item queries. If you want your mosaic broken up into tiles, pass in a tile_size argument (size in pixels). Tiles for the below call will be 100x100 except that the right and bottom boundaries of the mosaic where they maybe rectangular and smaller due to the mosaic not accomodating an integer number of tiles. You can also pass a list for bands like `bands = ['B02','B04']` if you want to select only certain bands to make a mosaic. Further, you can choose to make several single band mosaics or a multiband mosaic by passing in `Singleband` or `Multiband` to this function.
+You can pass in planetary computer query fields as keyword arguments to apply them as filters on your item queries. If you want your mosaic broken up into tiles, pass in a tile_size argument (size in pixels). Tiles for the below call will be 100x100 except that the right and bottom boundaries of the mosaic where they maybe rectangular and smaller due to the mosaic not accomodating an integer number of tiles. You can also pass a list for bands like `bands = ['B02','B04']` if you want to select only certain bands to make a mosaic. Further, you can choose to make several single band mosaics or a multiband mosaic by passing in `Singleband` or `Multiband` to this function. You can also choose whether to use the `Median` or `Minimum` value of each pixel in an image stack to create the mosaic by setting `mosaic_mode`.
 
 ```python
 mosaics_catalog = solafune_tools.create_basemap(
@@ -59,6 +59,7 @@ mosaics_catalog = solafune_tools.create_basemap(
     clip_to_aoi=True,
     tile_size=100,
     mosaic_style='Multiband',
+    mosaic_mode='Median',
 )
 ```
 The output is a link to a STAC catalog of all mosaics generated so far in the current data directory. See point 6 in the workflow below to see how to load and query it.
@@ -105,7 +106,8 @@ mosaic_file_loc = solafune_tools.create_mosaic(
     out_epsg='Auto',
     resolution=100,
     bands='Auto',
-    mosaic_style='Multiband'
+    mosaic_style='Multiband',
+    mosaic_mode='Median',
 )
 ```
 5. Update the STAC catalog for the mosaics folder.

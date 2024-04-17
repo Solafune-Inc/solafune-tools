@@ -16,6 +16,7 @@ def create_basemap(
     tile_size=None,
     clip_to_aoi=True,
     mosaic_style="Multiband",
+    mosaic_mode="Median",
 ) -> os.PathLike:
     """
     Creates a basemap given a geometry file, date range, bands and output resolution
@@ -48,6 +49,10 @@ def create_basemap(
     mosaic_style : 'Singleband' | 'Multiband''
                     Whether a single multiband mosaic is needed or individual
                     mosaics for every band
+
+    mosaic_mode : 'Median' | 'Minimum'
+                   Which function to use to generate a mosaic pixel from the image 
+                   stack
     """
     plc_stac_catalog = solafune_tools.image_fetcher.planetary_computer_stac_query(
         start_date=start_date,
@@ -80,6 +85,7 @@ def create_basemap(
         tile_size=tile_size,
         bands=bands,
         mosaic_style=mosaic_style,
+        mosaic_mode=mosaic_mode,
     )
 
     mosaics_catalog = solafune_tools.make_catalog.create_local_catalog_from_scratch(

@@ -82,7 +82,7 @@ def create_mosaic(
     aoi_geometry_file : str | path
                         geometry to clip mosaic to, defaults to None
     outfile_loc : str | path
-                  location where to write out the mosiac. 'Auto' will write to
+                  location where to write out the mosaic. 'Auto' will write to
                   the mosaic subdir in the data directory. If tile_size is not
                   None, this loc becomes a directory where the tiles are stored.
     out_epsg : int
@@ -92,7 +92,7 @@ def create_mosaic(
                 crs. For Sentinel-2 data, this is meters. If you use epsg:4326, it
                 will be degrees so be careful.
     tile_size : int
-                Size of square tiles in pixels for mosiac output. If none, a
+                Size of square tiles in pixels for mosaic output. If none, a
                 single large tif file is written out.
     bands : str | list(str)
            Pass in a list of bands for which you need mosaics. If Auto, all bands
@@ -126,14 +126,14 @@ def create_mosaic(
     stack = stackstac.stack(items, epsg=out_epsg, resolution=resolution)
 
     if mosaic_mode == 'Median':
-        mosiac = (
+        mosaic = (
             stack.dropna(dim="time", how="all")
             .sel(band=bands)
             .groupby("band")
             .median(dim="time", skipna=True)
         )
     else:
-        mosiac = (
+        mosaic = (
             stack.dropna(dim="time", how="all")
             .sel(band=bands)
             .groupby("band")
@@ -144,12 +144,12 @@ def create_mosaic(
         with open(aoi_geometry_file) as f:
             data = json.load(f)
         area_of_interest = data["features"][0]["geometry"]
-        mosiac = mosiac.rio.clip(geometries=[area_of_interest], crs=4326)
+        mosaic = mosaic.rio.clip(geometries=[area_of_interest], crs=4326)
 
     catalog_basename = os.path.split(os.path.dirname(local_stac_catalog))[-1]
 
     if tile_size is None:
-        outval = mosiac.compute()
+        outval = mosaic.compute()
         if outfile_loc == "Auto":
             outfile_basename = catalog_basename + "_".join(bands) + ".tif"
             data_dir = solafune_tools.settings.get_data_directory()
@@ -162,8 +162,8 @@ def create_mosaic(
         return outfile_loc
 
     else:
-        n_x_tiles = math.ceil(len(mosiac.x) / tile_size)
-        n_y_tiles = math.ceil(len(mosiac.y) / tile_size)
+        n_x_tiles = math.ceil(len(mosaic.x) / tile_size)
+        n_y_tiles = math.ceil(len(mosaic.y) / tile_size)
 
         if outfile_loc == "Auto":
             data_dir = solafune_tools.settings.get_data_directory()
@@ -182,9 +182,9 @@ def create_mosaic(
         if mosaic_style == "Multiband":
             for i in range(n_x_tiles):
                 for j in range(n_y_tiles):
-                    tile_data = mosiac.sel(
-                        x=mosiac.x[i * tile_size : (i + 1) * tile_size],
-                        y=mosiac.y[j * tile_size : (j + 1) * tile_size],
+                    tile_data = mosaic.sel(
+                        x=mosaic.x[i * tile_size : (i + 1) * tile_size],
+                        y=mosaic.y[j * tile_size : (j + 1) * tile_size],
                     )
                     # tile_data["band"] = bands
                     band_ids = "_".join(bands)
@@ -198,9 +198,9 @@ def create_mosaic(
         elif mosaic_style == "Singleband":
             for i in range(n_x_tiles):
                 for j in range(n_y_tiles):
-                    tile_data = mosiac.sel(
-                        x=mosiac.x[i * tile_size : (i + 1) * tile_size],
-                        y=mosiac.y[j * tile_size : (j + 1) * tile_size],
+                    tile_data = mosaic.sel(
+                        x=mosaic.x[i * tile_size : (i + 1) * tile_size],
+                        y=mosaic.y[j * tile_size : (j + 1) * tile_size],
                     )
                     # tile_data["band"] = bands
                     for band in bands:

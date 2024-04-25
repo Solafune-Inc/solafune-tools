@@ -61,6 +61,9 @@ def create_basemap(
         kwargs_dict=kwargs_dict,
     )
 
+    if bands == 'Auto':
+        bands = ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B09', 'B11', 'B12']
+        
     tiffile_dir = solafune_tools.image_fetcher.planetary_computer_fetch_images(
         dataframe_path=plc_stac_catalog,
         bands=bands,

@@ -21,3 +21,7 @@ def get_data_directory():
     if os.getenv("solafune_tools_data_dir") is None:
         set_data_directory()
     return os.getenv("solafune_tools_data_dir")
+
+def get_valid_bands():
+    """Returns a list of valid bands for Sentinel-2"""
+    return ["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B11", "B12"]

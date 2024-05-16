@@ -62,8 +62,17 @@ def create_basemap(
     )
 
     if bands == 'Auto':
-        bands = ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B09', 'B11', 'B12']
-        
+        bands = solafune_tools.settings.get_valid_bands()
+    else:
+        valid_bands = solafune_tools.settings.get_valid_bands()
+        if isinstance(bands, str):
+            if bands not in valid_bands:
+                raise ValueError(f"Invalid band {bands}. Valid bands are {valid_bands}")
+        elif isinstance(bands, list):
+            for band in bands:
+                if band not in valid_bands:
+                    raise ValueError(f"Invalid band {band}. Valid bands are {valid_bands}")
+                
     tiffile_dir = solafune_tools.image_fetcher.planetary_computer_fetch_images(
         dataframe_path=plc_stac_catalog,
         bands=bands,

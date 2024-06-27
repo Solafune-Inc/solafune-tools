@@ -51,7 +51,7 @@ def _write_to_file(bands, dataarray, outfile_loc):
             attrs={"long_name": band, "solafune_tools_ver": version("solafune_tools")},
         )
     ds = ds.assign_attrs(dataarray.attrs)
-    ds.astype("uint16").rio.to_raster(outfile_loc)
+    ds.fillna(0).astype("uint16").rio.to_raster(outfile_loc)
     return None
 
 

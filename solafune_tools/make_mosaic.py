@@ -126,30 +126,30 @@ def create_mosaic(
 
     stack = stackstac.stack(items, epsg=out_epsg, resolution=resolution)
 
-    if mosaic_mode == 'Median':
-        mosaic = (
-            stack.dropna(dim="time", how="all")
-            .sel(band=bands)
-            .groupby("band")
-            .median(dim="time", skipna=True)
-        )
-    else:
-        mosaic = (
-            stack.dropna(dim="time", how="all")
-            .sel(band=bands)
-            .groupby("band")
-            .min(dim="time", skipna=True)
-        )
-
     if aoi_geometry_file is not None:
         with open(aoi_geometry_file) as f:
             data = json.load(f)
         area_of_interest = data["features"][0]["geometry"]
-        mosaic = mosaic.rio.clip(geometries=[area_of_interest], crs=4326)
+
 
     catalog_basename = os.path.split(os.path.dirname(local_stac_catalog))[-1]
 
     if tile_size is None:
+        if mosaic_mode == 'Median':
+            mosaic = (
+                stack.dropna(dim="time", how="all")
+                .sel(band=bands)
+                .groupby("band")
+                .median(dim="time", skipna=True)
+            )
+        else:
+            mosaic = (
+                stack.dropna(dim="time", how="all")
+                .sel(band=bands)
+                .groupby("band")
+                .min(dim="time", skipna=True)
+            )
+        mosaic = mosaic.rio.clip(geometries=[area_of_interest], crs=4326)
         outval = mosaic.compute()
         if outfile_loc == "Auto":
             outfile_basename = catalog_basename + "_".join(bands) + ".tif"
@@ -163,8 +163,8 @@ def create_mosaic(
         return outfile_loc
 
     else:
-        n_x_tiles = math.ceil(len(mosaic.x) / tile_size)
-        n_y_tiles = math.ceil(len(mosaic.y) / tile_size)
+        n_x_tiles = math.ceil(len(stack.x) / tile_size)
+        n_y_tiles = math.ceil(len(stack.y) / tile_size)
 
         if outfile_loc == "Auto":
             data_dir = solafune_tools.settings.get_data_directory()
@@ -183,11 +183,23 @@ def create_mosaic(
         if mosaic_style == "Multiband":
             for i in range(n_x_tiles):
                 for j in range(n_y_tiles):
-                    tile_data = mosaic.sel(
-                        x=mosaic.x[i * tile_size : (i + 1) * tile_size],
-                        y=mosaic.y[j * tile_size : (j + 1) * tile_size],
-                    )
+                    print(f"On tile_{i}_{j} out of {n_x_tiles}x{n_y_tiles} tiles")
+                    if mosaic_mode == 'Median':
+                        tile_data = mosaic.sel(
+                            x=mosaic.x[i * tile_size : (i + 1) * tile_size],
+                            y=mosaic.y[j * tile_size : (j + 1) * tile_size],
+                        ).sel(band=bands).groupby("band").median(dim="time", skipna=True)
+                    else:
+                        tile_data = mosaic.sel(
+                            x=mosaic.x[i * tile_size : (i + 1) * tile_size],
+                            y=mosaic.y[j * tile_size : (j + 1) * tile_size],
+                        ).sel(band=bands).groupby("band").min(dim="time", skipna=True)
                     # tile_data["band"] = bands
+                    try:
+                        tile_data = tile_data.rio.clip(geometries=[area_of_interest], crs=4326)
+                    except rioxarray.exceptions.NoDataInBounds:
+                        print('tile skipped')
+                        continue
                     band_ids = "_".join(bands)
                     tile_file_loc = os.path.join(
                         outdir_loc,
@@ -199,11 +211,23 @@ def create_mosaic(
         elif mosaic_style == "Singleband":
             for i in range(n_x_tiles):
                 for j in range(n_y_tiles):
-                    tile_data = mosaic.sel(
-                        x=mosaic.x[i * tile_size : (i + 1) * tile_size],
-                        y=mosaic.y[j * tile_size : (j + 1) * tile_size],
-                    )
+                    print(f"On tile_{i}_{j} out of {n_x_tiles}x{n_y_tiles} tiles")
+                    if mosaic_mode == 'Median':
+                        tile_data = mosaic.sel(
+                            x=mosaic.x[i * tile_size : (i + 1) * tile_size],
+                            y=mosaic.y[j * tile_size : (j + 1) * tile_size],
+                        ).sel(band=bands).groupby("band").median(dim="time", skipna=True)
+                    else:
+                        tile_data = mosaic.sel(
+                            x=mosaic.x[i * tile_size : (i + 1) * tile_size],
+                            y=mosaic.y[j * tile_size : (j + 1) * tile_size],
+                        ).sel(band=bands).groupby("band").min(dim="time", skipna=True)
                     # tile_data["band"] = bands
+                    try:
+                        tile_data = tile_data.rio.clip(geometries=[area_of_interest], crs=4326)
+                    except rioxarray.exceptions.NoDataInBounds:
+                        print('tile skipped')
+                        continue
                     for band in bands:
                         tile_file_loc = os.path.join(
                             outdir_loc,

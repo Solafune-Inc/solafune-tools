@@ -102,7 +102,7 @@ def create_mosaic(
                     Whether a single multiband mosaic is needed or individual
                     mosaics for every band
     mosaic_mode : 'Median' | 'Minimum'
-                   Which function to use to generate a mosaic pixel from the image 
+                   Which function to use to generate a mosaic pixel from the image
                    stack
 
     """
@@ -113,8 +113,8 @@ def create_mosaic(
 
     if mosaic_mode not in ["Median", "Minimum"]:
         raise ValueError(
-                "Please use either 'Median' or 'Minimum' only for the parameter 'mosaic_mode'"
-            )
+            "Please use either 'Median' or 'Minimum' only for the parameter 'mosaic_mode'"
+        )
 
     catalog = pystac.Catalog.from_file(local_stac_catalog)
     items = list(catalog.get_items(recursive=True))
@@ -131,11 +131,10 @@ def create_mosaic(
             data = json.load(f)
         area_of_interest = data["features"][0]["geometry"]
 
-
     catalog_basename = os.path.split(os.path.dirname(local_stac_catalog))[-1]
 
     if tile_size is None:
-        if mosaic_mode == 'Median':
+        if mosaic_mode == "Median":
             mosaic = (
                 stack.dropna(dim="time", how="all")
                 .sel(band=bands)
@@ -184,21 +183,33 @@ def create_mosaic(
             for i in range(n_x_tiles):
                 for j in range(n_y_tiles):
                     print(f"On tile_{i}_{j} out of {n_x_tiles}x{n_y_tiles} tiles")
-                    if mosaic_mode == 'Median':
-                        tile_data = mosaic.sel(
-                            x=mosaic.x[i * tile_size : (i + 1) * tile_size],
-                            y=mosaic.y[j * tile_size : (j + 1) * tile_size],
-                        ).sel(band=bands).groupby("band").median(dim="time", skipna=True)
+                    if mosaic_mode == "Median":
+                        tile_data = (
+                            stack.sel(
+                                x=stack.x[i * tile_size : (i + 1) * tile_size],
+                                y=stack.y[j * tile_size : (j + 1) * tile_size],
+                                band=bands,
+                            )
+                            .groupby("band")
+                            .median(dim="time", skipna=True)
+                        )
                     else:
-                        tile_data = mosaic.sel(
-                            x=mosaic.x[i * tile_size : (i + 1) * tile_size],
-                            y=mosaic.y[j * tile_size : (j + 1) * tile_size],
-                        ).sel(band=bands).groupby("band").min(dim="time", skipna=True)
+                        tile_data = (
+                            stack.sel(
+                                x=stack.x[i * tile_size : (i + 1) * tile_size],
+                                y=stack.y[j * tile_size : (j + 1) * tile_size],
+                                band=bands,
+                            )
+                            .groupby("band")
+                            .min(dim="time", skipna=True)
+                        )
                     # tile_data["band"] = bands
                     try:
-                        tile_data = tile_data.rio.clip(geometries=[area_of_interest], crs=4326)
+                        tile_data = tile_data.rio.clip(
+                            geometries=[area_of_interest], crs=4326
+                        )
                     except rioxarray.exceptions.NoDataInBounds:
-                        print('tile skipped')
+                        print("tile skipped")
                         continue
                     band_ids = "_".join(bands)
                     tile_file_loc = os.path.join(
@@ -212,21 +223,33 @@ def create_mosaic(
             for i in range(n_x_tiles):
                 for j in range(n_y_tiles):
                     print(f"On tile_{i}_{j} out of {n_x_tiles}x{n_y_tiles} tiles")
-                    if mosaic_mode == 'Median':
-                        tile_data = mosaic.sel(
-                            x=mosaic.x[i * tile_size : (i + 1) * tile_size],
-                            y=mosaic.y[j * tile_size : (j + 1) * tile_size],
-                        ).sel(band=bands).groupby("band").median(dim="time", skipna=True)
+                    if mosaic_mode == "Median":
+                        tile_data = (
+                            stack.sel(
+                                x=stack.x[i * tile_size : (i + 1) * tile_size],
+                                y=stack.y[j * tile_size : (j + 1) * tile_size],
+                                band=bands,
+                            )
+                            .groupby("band")
+                            .median(dim="time", skipna=True)
+                        )
                     else:
-                        tile_data = mosaic.sel(
-                            x=mosaic.x[i * tile_size : (i + 1) * tile_size],
-                            y=mosaic.y[j * tile_size : (j + 1) * tile_size],
-                        ).sel(band=bands).groupby("band").min(dim="time", skipna=True)
+                        tile_data = (
+                            stack.sel(
+                                x=stack.x[i * tile_size : (i + 1) * tile_size],
+                                y=stack.y[j * tile_size : (j + 1) * tile_size],
+                                band=bands,
+                            )
+                            .groupby("band")
+                            .min(dim="time", skipna=True)
+                        )
                     # tile_data["band"] = bands
                     try:
-                        tile_data = tile_data.rio.clip(geometries=[area_of_interest], crs=4326)
+                        tile_data = tile_data.rio.clip(
+                            geometries=[area_of_interest], crs=4326
+                        )
                     except rioxarray.exceptions.NoDataInBounds:
-                        print('tile skipped')
+                        print("tile skipped")
                         continue
                     for band in bands:
                         tile_file_loc = os.path.join(

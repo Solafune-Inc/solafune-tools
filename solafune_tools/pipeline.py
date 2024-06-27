@@ -51,7 +51,7 @@ def create_basemap(
                     mosaics for every band
 
     mosaic_mode : 'Median' | 'Minimum'
-                   Which function to use to generate a mosaic pixel from the image 
+                   Which function to use to generate a mosaic pixel from the image
                    stack
     """
     plc_stac_catalog = solafune_tools.image_fetcher.planetary_computer_stac_query(
@@ -61,7 +61,7 @@ def create_basemap(
         kwargs_dict=kwargs_dict,
     )
 
-    if bands == 'Auto':
+    if bands == "Auto":
         bands = solafune_tools.settings.get_valid_bands()
     else:
         valid_bands = solafune_tools.settings.get_valid_bands()
@@ -71,8 +71,10 @@ def create_basemap(
         elif isinstance(bands, list):
             for band in bands:
                 if band not in valid_bands:
-                    raise ValueError(f"Invalid band {band}. Valid bands are {valid_bands}")
-                
+                    raise ValueError(
+                        f"Invalid band {band}. Valid bands are {valid_bands}"
+                    )
+
     tiffile_dir = solafune_tools.image_fetcher.planetary_computer_fetch_images(
         dataframe_path=plc_stac_catalog,
         bands=bands,

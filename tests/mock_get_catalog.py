@@ -3,9 +3,7 @@ import time
 
 import planetary_computer
 import pystac_client
-import pytest
 
-import solafune_tools
 
 # import os
 

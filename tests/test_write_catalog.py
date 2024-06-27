@@ -1,4 +1,5 @@
-import solafune_tools.image_fetcher, solafune_tools.settings
+import solafune_tools.image_fetcher
+import solafune_tools.settings
 import pytest
 import shutil
 import random

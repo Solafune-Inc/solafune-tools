@@ -8,3 +8,5 @@ Requests==2.31.0
 rioxarray==0.15.1
 stac_geoparquet==0.3.2
 stackstac==0.5.0
+shapely==2.0.3
+numpy==1.26.4

@@ -3,7 +3,7 @@
 </h1><br>
 
 ### solafune_tools: Internal Geodata Creation and Management Tools
-
+#### Oct 2024: Added a panoptic metric
 This package contains tools to download STAC catalogs and Sentinel-2 imagery from Planetary Computer and assembling it into a cloudless mosaic. Other tools will be added in the future.
 
 ## Quickstart
@@ -140,10 +140,20 @@ https://arxiv.org/abs/1801.00868
 Author: Toru Mitsutake(Solafune) \
 Solafune Username: sitoa
 
-### GetStarted
+### Gettin Started with PQ score
 ```python
+from shapely.geometry import Polygon
 from solafune_tools.metrics import PanopticMetric
 PQ = PanopticMetric()
+
+polygon1 = Polygon([(1, 2), (2, 4), (3, 1)])
+polygon2 = Polygon([(0, 0), (1, 3), (2, 2), (3, 0)])
+polygon3 = Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3)])
+polygon4 = Polygon([(2, 2), (3, 4), (4, 4), (5, 2), (3, 1)])
+
+ground_truth_polygons = [polygon1, polygon2]
+prediction_polygons = [polygon3, polygon4]
+
 pq, sq, rq = PQ.compute_pq(ground_truth_polygons, prediction_polygons)
 
 print("PQ: ", pq)

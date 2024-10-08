@@ -3,8 +3,10 @@
 </h1><br>
 
 ### solafune_tools: Internal Geodata Creation and Management Tools
-#### Oct 2024: Added a panoptic metric
+
 This package contains tools to download STAC catalogs and Sentinel-2 imagery from Planetary Computer and assembling it into a cloudless mosaic. Other tools will be added in the future.
+
+#### Oct 2024: Added a panoptic metric
 
 ## Quickstart
 

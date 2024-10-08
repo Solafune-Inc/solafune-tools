@@ -10,3 +10,4 @@ stac_geoparquet==0.3.2
 stackstac==0.5.0
 shapely==2.0.3
 numpy==1.26.4
+tqdm==4.66.2

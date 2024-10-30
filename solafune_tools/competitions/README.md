@@ -10,6 +10,8 @@ This repository contains a list of competition tools to help solafune's hacker s
 
 #### PQS Descriptions
 
+Panoptic Quality Submission or PQS for short is one of the metrics we use for evaluating user submissions to the solafune's submission website. This tool can be used to help you validate whether your submission complies or not with our JSON schema.
+
 #### Usage
 
 Using cli-base method
@@ -43,12 +45,12 @@ submission_dict = {
                 {
                     "class": "class_name",
                     "segmentation": [
-                        polygon1_x1,
-                        polygon1_y1,
-                        polygon1_x2,
-                        polygon1_y2,
-                        polygon1_xn,
-                        polygon1_yn,
+                        polygon2_x1,
+                        polygon2_y1,
+                        polygon2_x2,
+                        polygon2_y2,
+                        polygon2_xn,
+                        polygon2_yn,
                     ]
                 }
             ]

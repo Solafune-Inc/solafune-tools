@@ -1,1 +1,0 @@
-from solafune_tools.competitions.pq_scoring_submission import *

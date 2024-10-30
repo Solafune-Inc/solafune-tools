@@ -23,7 +23,7 @@ python pq_scoring_submission.py --input_path input.json # Insert your JSON file
 Using library-base function
 
 ```python
-from solafune_tools.competitions import pq_scoring_submission
+from solafune_tools.competition_tools import pq_scoring_submission
 
 # From variable
 submission_dict = {

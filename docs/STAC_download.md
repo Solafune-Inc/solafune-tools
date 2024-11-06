@@ -1,4 +1,4 @@
-# STAC Download and Sentinel-2 Imagery
+# STAC Download on Sentinel-2 Data
 
 A one-shot command exists to make a cloudless mosaic given a daterange and area of interest. 
 Before running this function, create a Dask server and client. This function uses lazy chunked xarray Dataarrays which can (and should) be processed in parallel. The simplest way to do so is to open a Jupyter notebook and paste the following code into it. If you call this from within a python script, you need to put it under a ` if __name__ == "__main__":` block to work.

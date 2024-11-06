@@ -19,9 +19,9 @@ Tools repository where solafune developers and solafune hackers can share their 
 
     Description to the tools
 
-    ## Impact to the data
+    ## Impact to the data and Example of the dataset
 
-    How this tools will impact the data for training or evaluation
+    How this tools will impact the data for training or evaluation. What kind of data might best for this tool
 
     ## Usage
 

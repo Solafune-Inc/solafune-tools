@@ -2,6 +2,14 @@
 <img src="https://solafune-contents.s3.ap-northeast-1.amazonaws.com/Solafune+Tools+Logo.png" width="300">
 </h1><br>
 
+<div align="center">
+  
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
+![Current Version](https://img.shields.io/badge/Version-0.4.2-brightgreen?logo=tag&logoColor=white)
+![GitHub stars](https://img.shields.io/github/stars/Solafune-Inc/solafune-tools?style=social)
+
+</div>
+
 ## Solafune-Tools: Open tools for solafune's developers and solafune's hackers where can share developed tools in geospatial data
 This library package is an integrated open-source tool for solafune's developers, solafune's hackers, scientists, engineers, students, and anyone who is interested in doing geospatial data analysis. The solafune-tools contain many tools to help you develop your analysis like downloading STAC catalogs and Sentinel-2 imagery (from Planetary Computer) and then assembling it into a cloudless mosaic, competition_tools, community_tools, and other tools in geospatial data analysis. Other tools also will be added in the future.
 

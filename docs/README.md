@@ -5,3 +5,4 @@ This side of the repository contains documentation for developed tools in solafu
 ## Tool list
 1. [STAC Downloading on Sentinel-2 Data](STAC_download.md)
 2. [Metrics Toolset](metrics_toolset.md)
+3. [Community Tools](community_tools/README.md)

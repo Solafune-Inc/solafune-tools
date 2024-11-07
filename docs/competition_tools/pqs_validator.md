@@ -1,6 +1,4 @@
-# Panoptic Quality Submission
-
-## PQS Descriptions
+# Panoptic Quality Submission Validator
 
 Panoptic Quality Submission or PQS for short is one of the metrics we use for evaluating user submissions to the solafune's submission website. This tool can be used to help you validate whether your submission complies or not with our JSON schema.
 

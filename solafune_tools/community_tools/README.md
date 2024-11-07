@@ -10,24 +10,24 @@ Tools repository where solafune developers and solafune hackers can share their 
 2. Develop your tools and put in `solafune_tools/community_tools/<your-tools-name>/`
 3. Add your tools' requirements to the requirements.txt. Ensure your tools' dependencies are compatible with the current dependencies in solafune_tools.
 4. Add your tools' unit test to make sure your tools are working as intended.
-5. Add your README.md, describe why you develop your tools, the impact for data, and how to use it. Example:
+5. Add your README.md in your folder tools, describe why you developed your tools, and the impact on data. Example:
 
     ```markdown
     # Tools-Name
 
     ## Description
 
-    Description to the tools
+    Description of the tools
 
     ## Impact to the data and Example of the dataset
 
-    How this tools will impact the data for training or evaluation. What kind of data might best for this tool
+    How these tools will impact the data for training or evaluation? What kind of data might be best for this tool?
 
-    ## Usage
-
-    1. etc
-    2. ...
+    ## Usage Documentation
+    
+    Refers to this [link](/solafune_tools/docs/community_tools/<your-tools-name>.md) for the usage of this tool
     ```
-
-6. Request for pull-merge request.
-7. Wait, and we will check your codes and approve your tools if they comply with our terms and conditions.
+    
+7. Add your documentation on how to use these tools into the `solafune_tools/docs/community_tools/<your-tools-name>.md`
+8. Request for pull-merge request.
+9. Wait, and we will check your codes and approve your tools if they comply with our terms and conditions.

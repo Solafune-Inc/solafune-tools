@@ -2,8 +2,7 @@
 <img src="https://solafune-contents.s3.ap-northeast-1.amazonaws.com/Solafune+Tools+Logo.png" width="300">
 </h1><br>
 
-### solafune_tools: Open tools for solafune's developers and solafune's hackers where can share developed tools in geospatial data
-
+## Solafune-Tools: Open tools for solafune's developers and solafune's hackers where can share developed tools in geospatial data
 This library package is an integrated open-source tool for solafune's developers, solafune's hackers, scientists, engineers, students, and anyone who is interested in doing geospatial data analysis. The solafune-tools contain many tools to help you develop your analysis like downloading STAC catalogs and Sentinel-2 imagery (from Planetary Computer) and then assembling it into a cloudless mosaic, competition_tools, community_tools, and other tools in geospatial data analysis. Other tools also will be added in the future.
 
 #### Oct 2024: Added a panoptic metric

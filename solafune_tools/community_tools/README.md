@@ -25,9 +25,9 @@ Tools repository where solafune developers and solafune hackers can share their 
 
     ## Usage Documentation
     
-    Refers to this [link](/solafune_tools/docs/community_tools/<your-tools-name>.md) for the usage of this tool
+    Refers to this [link](/solafune-tools/docs/community_tools/<your-tools-name>.md) for the usage of this tool
     ```
-    
-7. Add your documentation on how to use these tools into the `solafune_tools/docs/community_tools/<your-tools-name>.md`
-8. Request for pull-merge request.
-9. Wait, and we will check your codes and approve your tools if they comply with our terms and conditions.
+
+6. Add your documentation on how to use these tools into the `/solafune-tools/docs/community_tools/<your-tools-name>.md`
+7. Request for pull-merge request.
+8. Wait, and we will check your codes and approve your tools if they comply with our terms and conditions.

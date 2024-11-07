@@ -6,4 +6,4 @@ This repository contains a list of competition tools to help solafune's hacker s
 
 ## Listed Tools
 
-1. Panoptic Quality Submission Validator, refer to the [documentation](/solafune-tools/docs/competition_tools/pqs_validator.md)
+1. Panoptic Quality Submission Validator, refer to the [documentation](/docs/competition_tools/pqs_validator.md)

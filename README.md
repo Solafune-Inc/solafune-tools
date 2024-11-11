@@ -11,9 +11,10 @@
 </div>
 
 ## Solafune-Tools: Open tools for solafune's developers and solafune's hackers where can share developed tools in geospatial data
-This library package is an integrated open-source tool for solafune's developers, solafune's hackers, scientists, engineers, students, and anyone who is interested in doing geospatial data analysis. The solafune-tools contain many tools to help you develop your analysis like downloading STAC catalogs and Sentinel-2 imagery (from Planetary Computer) and then assembling it into a cloudless mosaic, competition_tools, community_tools, and other tools in geospatial data analysis. Other tools also will be added in the future.
 
-#### Oct 2024: Added a panoptic metric
+This library package is an integrated open-source tool for Solafune developers, Solafune hackers, scientists, engineers, students, and anyone who is interested in doing geospatial data analysis. The solafune-tools contain many tools to help you develop your analysis like downloading STAC catalogs and Sentinel-2 imagery (from Planetary Computer) and then assembling it into a cloudless mosaic, competition_tools, community_tools, and other tools in geospatial data analysis. Other tools also will be added in the future.
+
+### Nov 2024: Major update in how solafune-tools work
 
 ## Quickstart
 
@@ -33,6 +34,7 @@ solafune_tools.set_data_directory(dir_path="your_data_dir_here")
 The above command sets the environment variable `solafune_tools_data_dir` from where all sub-modules draw their file paths. It is not set persistenly (i.e., not written to `.bashrc` or similar), so you will need to set it each time you ssh into your machine or on reboot. If you do not explicitly set this, it will default to creating/using a `data` folder within your current working directory.
 
 ## Documentation
+
 Refer to this [link](docs/README.md) for further information on each tool contained in this repository.
 
 ## Contributions

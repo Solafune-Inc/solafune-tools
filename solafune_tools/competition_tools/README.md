@@ -2,7 +2,7 @@
 
 ## Descriptions
 
-This repository contains a list of competition tools to help solafune's hacker submit their submission and other things related to solafune's competition.
+This repository contains a list of competition tools to help Solafune hackers submit their submission and other things related to Solafune competition.
 
 ## Listed Competition Tools
 

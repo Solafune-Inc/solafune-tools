@@ -2,7 +2,7 @@
 
 ## Descriptions
 
-Tools repository where solafune developers and solafune hackers can share their tools on satellite data-related processing tools.
+Tools repository where Solafune hackers can share their tools on satellite data-related processing tools.
 
 ## How to add your tools
 
@@ -25,10 +25,10 @@ Tools repository where solafune developers and solafune hackers can share their 
 
     ## Usage Documentation
     
-    Refers to this [link](/solafune-tools/docs/community_tools/<your-tools-name>.md) for the usage of this tool
+    Refers to this [link](/docs/community_tools/<your-tools-name>.md) for the usage of this tool
     ```
 
-6. Add your documentation on how to use these tools into the `/solafune-tools/docs/community_tools/<your-tools-name>.md`
+6. Add your documentation on how to use these tools into the `/docs/community_tools/<your-tools-name>.md`
 7. Request for pull-merge request.
 8. Wait, and we will check your codes and approve your tools if they comply with our terms and conditions.
 

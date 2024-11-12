@@ -5,7 +5,7 @@
 <div align="center">
   
 ![Python](https://img.shields.io/badge/Python-%3E%3D3.10-blue?logo=python&logoColor=white)
-![Current Version](https://img.shields.io/badge/Version-0.4.2-brightgreen?logo=tag&logoColor=white)
+![Latest Release](https://img.shields.io/github/v/release/solafune-inc/solafune-tools?color=brightgreen&logo=tag&logoColor=white)
 ![GitHub stars](https://img.shields.io/github/stars/Solafune-Inc/solafune-tools?style=social)
 
 </div>

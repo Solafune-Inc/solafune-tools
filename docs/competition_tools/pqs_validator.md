@@ -47,11 +47,11 @@ submission_dict = {
         }
     ]
 }
-validated_submission = pq_scoring_submission.submission_validator(pdict = submission_dict)
+validated_submission, number_of_images = pq_scoring_submission.submission_validator(pdict = submission_dict)
 print(validated_submission)
 
 # From saved file
 submission_file = "path/to/your/file.json"
-validated_submission = pq_scoring_submission.submission_validator(file_path = submission_file)
+validated_submission, number_of_images = pq_scoring_submission.submission_validator(file_path = submission_file)
 print(validated_submission)
 ```

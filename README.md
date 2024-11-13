@@ -43,4 +43,9 @@ Thank you for your interest in contributing to **solafune-tools**! This project 
 
 ### Credits
 
-For those who have contribute to this OSS, We are grateful for your contribution in this development of geospatial tools.
+For those who have contributed to this OSS, We are grateful for your contribution to this development of geospatial tools. In this section, we will add a table to show users who have contributed and how many pull requests successively made, stay tuned!
+| Contributor | Number of Pull Requests |
+|-------------|-------------------------|
+| user1       | 10                      |
+| user2       | 5                       |
+| user3       | 3                       |

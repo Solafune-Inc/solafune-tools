@@ -37,7 +37,7 @@ def check_dict(pdict : dict) -> str:
     - Each annotation contains a "segmentation" key with a list of coordinates.
     - The "segmentation" list has an even number of elements and at least 4 elements.
     """
-    image_names = [f'test_{x}.tif' for x in range(len(pdict["images"]))]
+    
     if not pdict:
         return "Empty dictionary"
     
@@ -50,6 +50,10 @@ def check_dict(pdict : dict) -> str:
     if not isinstance(pdict["images"], list):
         return "images is not a list"
     
+    if str(pdict["images"][0]["file_name"]).split("_")[0] == "evaluation":
+        image_names = [f'evaluation_{x}.tif' for x in range(len(pdict["images"]))]
+    else:
+        image_names = [f'test_{x}.tif' for x in range(len(pdict["images"]))]
     
     for image in pdict["images"]:
         if not "file_name" in image:

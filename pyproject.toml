@@ -1,9 +1,12 @@
 [project]
 name = "solafune-tools"
-version = "0.5.1"
+version = "0.5.2"
 description = "Solafune internal geodata management tools"
 authors = [
+    {name = "Solafune, Inc.", email = ""},
     {name = "Pushkar Kopparla", email = "pushkar.kopparla@solafune.com"},
+    {name = "Toru Mitsutake", email = "toru.mitsutake@solafune.com"},
+    {name = "Lanang Afkaar", email = "afkaar.lanang@solafune.com"},
 ]
 readme = "README.md"
 requires-python = ">=3.10"

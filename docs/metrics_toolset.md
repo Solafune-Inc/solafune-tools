@@ -48,3 +48,34 @@ https://shapely.readthedocs.io/en/stable/
 - pq: Panoptic Quality score
 - sq: Segmentation Quality score
 - rq: Recognition Quality score
+
+## F1 Score Compute Function
+
+This function computes the F1 score, specifically tailored for segmentation tasks, to evaluate the quality of predictions against the ground truth. The F1 score, often referred to as the Dice coefficient in segmentation, is a metric that quantifies the overlap between predicted and ground-truth masks. The score ranges from 0 to 1, where 1 indicates a perfect match between predicted and ground-truth masks. This metric is particularly useful for semantic and instance segmentation tasks, especially when handling imbalanced datasets or when high precision and recall are equally critical.
+
+## Authors Information
+
+Author: Lanang Afkaar \
+Solafune username: Fulankun1412
+
+### Gettin Started with F1 score
+
+```python
+from shapely.geometry import Polygon
+from solafune_tools.metrics import F1_Metrics
+F1_score = F1_Metrics()
+
+polygon1 = Polygon([(1, 2), (2, 4), (3, 1)])
+polygon2 = Polygon([(0, 0), (1, 3), (2, 2), (3, 0)])
+polygon3 = Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3)])
+polygon4 = Polygon([(2, 2), (3, 4), (4, 4), (5, 2), (3, 1)])
+
+ground_truth_polygons = [polygon1, polygon2]
+prediction_polygons = [polygon3, polygon4]
+
+f1, precision, recall = F1_score.compute_f1(ground_truth_polygons, prediction_polygons)
+
+print("F1: ", f1)
+print("Precision: ", precision)
+print("Recall: ", recall)
+```

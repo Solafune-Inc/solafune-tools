@@ -79,3 +79,17 @@ print("F1: ", f1)
 print("Precision: ", precision)
 print("Recall: ", recall)
 ```
+
+### Input
+
+- ground_truth_polygons: List of polygons representing the ground truth segmentation.
+- prediction_polygons: List of polygons representing the predicted segmentation.
+
+polygons is shapely.geometry.Polygon object
+https://shapely.readthedocs.io/en/stable/
+
+### Output
+
+- f1: F1 score
+- precision: Precision value
+- recall: Recall value

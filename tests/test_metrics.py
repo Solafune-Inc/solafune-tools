@@ -48,6 +48,42 @@ def test_compute_pq_same_score_with_dif_order():
     assert sq1 == sq2
     assert rq1 == rq2
 
+from shapely.geometry import Polygon
+
+def test_compute_pq_zero_score():
+    true_polygons = [
+        Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3), (5, 5)]),
+        Polygon([(4, 4), (5, 6), (7, 7), (8, 5), (7, 4), (4, 4)]),
+        Polygon([(3, 3), (4, 5), (6, 5), (7, 3), (5, 2), (3, 3)]),
+    ]
+    pred_polygons = [
+        Polygon([(20, 20), (21, 21), (22, 20), (23, 19), (20, 18), (20, 20)]),
+        Polygon([(30, 30), (31, 32), (33, 33), (34, 31), (33, 30), (30, 30)]),
+        Polygon([(40, 40), (41, 42), (43, 42), (44, 40), (42, 39), (40, 40)]),
+    ]
+    PQ = PanopticMetric()
+    pq, sq, rq = PQ.compute_pq(true_polygons, pred_polygons)
+    assert pq == 0
+    assert sq == 0
+    assert rq == 0
+
+def test_compute_pq_perfect_score():
+    true_polygons = [
+        Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3), (5, 5)]),
+        Polygon([(4, 4), (5, 6), (7, 7), (8, 5), (7, 4), (4, 4)]),
+        Polygon([(3, 3), (4, 5), (6, 5), (7, 3), (5, 2), (3, 3)]),
+    ]
+    pred_polygons = [
+        Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3), (5, 5)]),
+        Polygon([(4, 4), (5, 6), (7, 7), (8, 5), (7, 4), (4, 4)]),
+        Polygon([(3, 3), (4, 5), (6, 5), (7, 3), (5, 2), (3, 3)]),
+    ]
+    PQ = PanopticMetric()
+    pq, sq, rq = PQ.compute_pq(true_polygons, pred_polygons)
+    assert pq == 1
+    assert sq == 1
+    assert rq == 1
+
 def test_f1_score():
     polygon1 = Polygon([(1, 2), (2, 4), (3, 1)])
     polygon2 = Polygon([(0, 0), (1, 3), (2, 2), (3, 0)])
@@ -89,3 +125,37 @@ def test_f1_score_same_score_with_dif_order():
     assert f1_1 == f1_2
     assert precision_1 == precision_2
     assert recall_1 == recall_2
+
+def test_f1_score_zero_score():
+    true_polygons = [
+        Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3), (5, 5)]),
+        Polygon([(4, 4), (5, 6), (7, 7), (8, 5), (7, 4), (4, 4)]),
+        Polygon([(3, 3), (4, 5), (6, 5), (7, 3), (5, 2), (3, 3)]),
+    ]
+    pred_polygons = [
+        Polygon([(20, 20), (21, 21), (22, 20), (23, 19), (20, 18), (20, 20)]),
+        Polygon([(30, 30), (31, 32), (33, 33), (34, 31), (33, 30), (30, 30)]),
+        Polygon([(40, 40), (41, 42), (43, 42), (44, 40), (42, 39), (40, 40)]),
+    ]
+    F1 = F1_Metrics()
+    f1, precision, recall = F1.compute_f1(true_polygons, pred_polygons)
+    assert f1 == 0
+    assert precision == 0
+    assert recall == 0
+
+def test_f1_score_perfect_score():
+    true_polygons = [
+        Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3), (5, 5)]),
+        Polygon([(4, 4), (5, 6), (7, 7), (8, 5), (7, 4), (4, 4)]),
+        Polygon([(3, 3), (4, 5), (6, 5), (7, 3), (5, 2), (3, 3)]),
+    ]
+    pred_polygons = [
+        Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3), (5, 5)]),
+        Polygon([(4, 4), (5, 6), (7, 7), (8, 5), (7, 4), (4, 4)]),
+        Polygon([(3, 3), (4, 5), (6, 5), (7, 3), (5, 2), (3, 3)]),
+    ]
+    F1 = F1_Metrics()
+    f1, precision, recall = F1.compute_f1(true_polygons, pred_polygons)
+    assert f1 == 1
+    assert precision == 1
+    assert recall == 1

@@ -137,7 +137,7 @@ class F1_Metrics:
         tp = len(matched_instances)
         fp = len(pred_polygons) - tp
         fn = len(gt_polygons) - tp
-        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
-        recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-        f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 1  # if no prediction, precision is considered as 1
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 1  # if no ground truth, recall is considered as 1
+        f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0  # if either precision or recall is 0, f1 is 0
         return f1, precision, recall

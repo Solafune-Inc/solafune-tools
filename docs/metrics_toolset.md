@@ -55,12 +55,12 @@ https://shapely.readthedocs.io/en/stable/
 
 This function computes the F1 score which leveraged Intersection Over Union (IoU) , specifically tailored for segmentation tasks, to evaluate the quality of predictions against the ground truth polygons. The F1 score, often referred to as the Dice coefficient in segmentation, is a metric that quantifies the overlap between predicted and ground-truth masks. The score ranges from 0 to 1, where 1 indicates a perfect match between predicted and ground-truth masks. This metric is particularly useful for semantic and instance segmentation tasks, especially when handling imbalanced datasets or when high precision and recall are equally critical.
 
-## Authors Information
+#### Authors Information
 
 Author: Lanang Afkaar \
 Solafune username: Fulankun1412
 
-### Gettin Started with F1 score
+#### Gettin Started with F1 score
 
 ```python
 from shapely.geometry import Polygon
@@ -82,7 +82,7 @@ print("Precision: ", precision)
 print("Recall: ", recall)
 ```
 
-### Input
+#### Input
 
 - ground_truth_polygons: List of polygons representing the ground truth segmentation.
 - prediction_polygons: List of polygons representing the predicted segmentation.
@@ -90,7 +90,7 @@ print("Recall: ", recall)
 polygons is shapely.geometry.Polygon object
 https://shapely.readthedocs.io/en/stable/
 
-### Output
+#### Output
 
 - f1: F1 score
 - precision: Precision value
@@ -102,12 +102,12 @@ https://shapely.readthedocs.io/en/stable/
 
 This function computes the F1 score which leveraged Pixel-level evaluation, specifically tailored for segmentation tasks, to evaluate the quality of predictions against the ground truth polygons. The F1 score, often referred to as the Dice coefficient in segmentation, is a metric that quantifies the overlap between predicted and ground-truth masks. The score ranges from 0 to 1, where 1 indicates a perfect match between predicted and ground-truth masks. This metric is particularly useful for semantic and instance segmentation tasks, especially when handling imbalanced datasets or when high precision and recall are equally critical.
 
-## Authors Information
+#### Authors Information
 
 Author: Lanang Afkaar \
 Solafune username: Fulankun1412
 
-### Gettin Started with F1 score
+#### Gettin Started with F1 score
 
 ```python
 from shapely.geometry import Polygon
@@ -129,7 +129,7 @@ print("Precision: ", precision)
 print("Recall: ", recall)
 ```
 
-### Input
+#### Input
 
 - ground_truth_polygons: List of polygons representing the ground truth segmentation.
 - prediction_polygons: List of polygons representing the predicted segmentation.
@@ -137,7 +137,7 @@ print("Recall: ", recall)
 polygons is shapely.geometry.Polygon object
 https://shapely.readthedocs.io/en/stable/
 
-### Output
+#### Output
 
 - f1: F1 score
 - precision: Precision value

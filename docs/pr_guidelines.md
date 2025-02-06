@@ -1,4 +1,4 @@
-# **Guidelines for Submitting Community Tools and Other Pull Requests either in solafune_tools.community_tools or improvement of other tools.**
+## **Guidelines for Submitting Community Tools and Other Pull Requests either in solafune_tools.community_tools or improvement of other tools.**
 
 1. **Accessibility**
     1. All submitted tools must be in a form that is easily accessible by other users within the solafune_tools.community_tools namespace.
@@ -34,13 +34,7 @@
     2. Feedback on necessary changes or improvements will be provided during the review process.
     3. Approved tools will be merged into the official solafune_tools.community_tools repository.
 
-Japanese Version
-
-### Solafune-Tools について
-
-Solafune-Tools は、研究と地理空間分析に不可欠なツールを提供することでリモート センシング コミュニティを強化するように設計されたオープン ソース ソフトウェア プロジェクトです。リモート センシング関連のタスクを容易にし、Solafune が主催するコンテストでのユーザー エクスペリエンスを向上させ、シームレスなデータ処理、分析、コラボレーションを実現します。
-
-solafune_tools.community_tools またはその他のツールの改善に関するコミュニティ ツールおよびその他のプル リクエストを送信するためのガイドライン。
+## solafune_tools.community_tools またはその他のツールの改善に関するコミュニティ ツールおよびその他のプル リクエストを送信するためのガイドライン。
 
 1. **アクセシビリティ**
     1. 提出されたすべてのツールは、solafune_tools.community_tools 名前空間内の他のユーザーが簡単にアクセスできる形式である必要があります。

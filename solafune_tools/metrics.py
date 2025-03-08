@@ -3,132 +3,122 @@ import numpy as np
 from tqdm import tqdm
 from rasterio.features import rasterize
 
+def bbox_to_polygon(bbox: list) -> Polygon:
+    """
+    Converts a bounding box into a polygon.
+
+    Parameters:
+        bbox (list): [x_min, y_min, width, height]
+
+    Returns:
+        Polygon: Polygon object representing the bounding box.
+    """
+    x_min, y_min, width, height = bbox
+    return Polygon([
+        (x_min, y_min), (x_min + width, y_min), (x_min + width, y_min + height), (x_min, y_min + height)
+    ])
+
 class IOUBasedMetrics:
     def __init__(self) -> None:
         """
         Initializes the IOUBasedMetrics class.
-        
-        This class provides methods to compute metrics based on the Intersection over Union (IoU) 
-        between polygons, such as precision, recall, F1 score, and Panoptic Quality (PQ).
         """
         pass
 
     def getIOU(self, polygon1: Polygon, polygon2: Polygon) -> float:
         """
         Computes the Intersection over Union (IoU) between two polygons.
-        Parameters
-        ----------
-        polygon1 : Polygon
-            The first polygon.
-        polygon2 : Polygon
-            The second polygon.
-        Returns
-        -------
-        float
-            The IoU value between the two polygons.
         """
         intersection = polygon1.intersection(polygon2).area
         union = polygon1.union(polygon2).area
-        if union == 0:
-            return 0
-        return intersection / union
+        return intersection / union if union > 0 else 0
 
-    def compute_pq(self, gt_polygons: list, pred_polygons: list, iou_threshold=0.5) -> tuple:
+    def match_polygons(self, gt_polygons: list, pred_polygons: list, iou_threshold=0.5):
         """
-        Compute the Panoptic Quality (PQ), Segmentation Quality (SQ), and Recognition Quality (RQ) 
-        for the given ground truth and predicted polygons.
-
-        Args:
-            gt_polygons (list): List of ground truth polygons.
-            pred_polygons (list): List of predicted polygons.
-            matched_instances (dict): Dictionary of matched instances with IoU values.
-
-        Returns:
-            tuple: A tuple containing the PQ, SQ, and RQ.
+        Matches ground truth polygons with predicted polygons based on IoU threshold.
         """
         matched_instances = {}
         gt_matched = np.zeros(len(gt_polygons))
         pred_matched = np.zeros(len(pred_polygons))
-
-        gt_matched = np.zeros(len(gt_polygons))
-        pred_matched = np.zeros(len(pred_polygons))
-        for gt_idx, gt_polygon in tqdm(enumerate(gt_polygons)):
+        
+        for gt_idx, gt_polygon in enumerate(gt_polygons):
             best_iou = iou_threshold
             best_pred_idx = None
+            
             for pred_idx, pred_polygon in enumerate(pred_polygons):
-                # if gt_matched[gt_idx] == 1 or pred_matched[pred_idx] == 1:
-                #     continue
-                
                 iou = self.getIOU(gt_polygon, pred_polygon)
-                if iou == 0:
-                    continue
-                
                 if iou > best_iou:
                     best_iou = iou
                     best_pred_idx = pred_idx
+            
             if best_pred_idx is not None:
                 matched_instances[(gt_idx, best_pred_idx)] = best_iou
                 gt_matched[gt_idx] = 1
                 pred_matched[best_pred_idx] = 1
+        
+        return matched_instances, gt_matched, pred_matched
 
+    def compute_pq(self, gt_polygons: list, pred_polygons: list, iou_threshold=0.5) -> tuple:
+        """
+        Compute Panoptic Quality (PQ), Segmentation Quality (SQ), and Recognition Quality (RQ).
+        """
+        matched_instances, _, _ = self.match_polygons(gt_polygons, pred_polygons, iou_threshold)
         
         sq_sum = sum(matched_instances.values())
         num_matches = len(matched_instances)
         sq = sq_sum / num_matches if num_matches else 0
-        rq = num_matches / ((len(gt_polygons) + len(pred_polygons))/2.0) if (gt_polygons or pred_polygons) else 0
+        rq = num_matches / ((len(gt_polygons) + len(pred_polygons)) / 2.0) if (gt_polygons or pred_polygons) else 0
         pq = sq * rq
-
+        
         return pq, sq, rq
     
     def compute_f1(self, gt_polygons: list, pred_polygons: list, iou_threshold=0.5) -> tuple:
         """
         Compute the F1 score, precision, and recall for the given ground truth and predicted polygons.
-    
-        Args:
-            gt_polygons (list): List of ground truth polygons.
-            pred_polygons (list): List of predicted polygons.
-            iou_threshold (float, optional): Intersection over Union (IoU) threshold to consider a match. Defaults to 0.5.
-    
-        Returns:
-            tuple: A tuple containing the F1 score, precision, and recall.
         """
-        matched_instances = {}
-        gt_matched = np.zeros(len(gt_polygons))
-        pred_matched = np.zeros(len(pred_polygons))
-
-        # IoU計算とマッチング候補の特定
-        gt_matched = np.zeros(len(gt_polygons))
-        pred_matched = np.zeros(len(pred_polygons))
-        for gt_idx, gt_polygon in enumerate(gt_polygons):
-            best_iou = iou_threshold
-            best_pred_idx = None
-            for pred_idx, pred_polygon in enumerate(pred_polygons):
-                # if gt_matched[gt_idx] == 1 or pred_matched[pred_idx] == 1:
-                #     continue
-                
-                iou = self.getIOU(gt_polygon, pred_polygon)
-                if iou == 0:
-                    continue
-                
-                if iou > best_iou:
-                    best_iou = iou
-                    best_pred_idx = pred_idx
-            if best_pred_idx is not None:
-                matched_instances[(gt_idx, best_pred_idx)] = best_iou
-                gt_matched[gt_idx] = 1
-                pred_matched[best_pred_idx] = 1
-
-        # F1, Precision, Recall
+        matched_instances, gt_matched, pred_matched = self.match_polygons(gt_polygons, pred_polygons, iou_threshold)
         
         tp = len(matched_instances)
         fp = len(pred_polygons) - tp
         fn = len(gt_polygons) - tp
-
+        
         precision = tp / (tp + fp) if (tp + fp) > 0 else 1.0  # if no prediction, precision is considered as 1
         recall = tp / (tp + fn) if (tp + fn) > 0 else 1.0  # if no ground truth, recall is considered as 1
         f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0  # if either precision or recall is 0, f1 is 0
-
+        
         return f1, precision, recall
+    
+    def compute_map(self, gt_polygons: list, pred_polygons: list, iou_thresholds=None) -> float:
+        """
+        Compute mean Average Precision (mAP) over a range of IoU thresholds.
+        If no thresholds are provided, it defaults to [0.5, 1.0, 0.05].
+        """
+        if iou_thresholds is None:
+            iou_thresholds = [0.5, 0.95, 0.05]
+        elif isinstance(iou_thresholds, (float, int)):  # Handle single threshold case
+            iou_thresholds = [iou_thresholds]
+
+        average_precisions = []
+        
+        for iou_threshold in iou_thresholds:
+            matched_instances, _, _ = self.match_polygons(gt_polygons, pred_polygons, iou_threshold)
+            tp = len(matched_instances)
+            fp = len(pred_polygons) - tp
+            fn = len(gt_polygons) - tp
+            
+            precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+            recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+            
+            precisions = [precision]
+            recalls = [recall]
+            
+            for threshold in np.linspace(0, 1, 11):  # Standard 11-point interpolation
+                precisions.append(max([p for r, p in zip(recalls, precisions) if r >= threshold], default=0))
+            
+            ap = np.mean(precisions)
+            average_precisions.append(ap)
+
+        return np.mean(average_precisions) if average_precisions else 0.0
     
 class PixelBasedMetrics:
     def __init__(self) -> None:

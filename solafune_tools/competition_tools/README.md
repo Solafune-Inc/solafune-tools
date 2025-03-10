@@ -6,4 +6,4 @@ This repository contains a list of competition tools to help Solafune hackers su
 
 ## Listed Competition Tools
 
-1. Solafune Dataset Submission Validator, refer to the [documentation](/docs/competition_tools/solafune_dataset_validator_validator.md)
+1. Solafune Dataset Submission Validator, refer to the [documentation](/docs/competition_tools/solafune_dataset_validator.md)

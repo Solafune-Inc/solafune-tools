@@ -1,4 +1,4 @@
-from solafune_tools.competition_tools import pq_scoring_submission
+from solafune_tools.competition_tools import solafune_dataset
 
 def test_compute_pq_from_var():
     # From variable
@@ -33,13 +33,13 @@ def test_compute_pq_from_var():
             }
         ]
     }
-    validated_submission, num_images = pq_scoring_submission.submission_validator(pdict = submission_dict)
+    validated_submission, num_images = solafune_dataset.submission_validator(pdict = submission_dict)
     assert validated_submission == "Valid"
     assert num_images == 1
 
 def test_compute_pq_from_file():
     # From file
     submission_file = "tests/data-test/sample.json"
-    validated_submission, num_images = pq_scoring_submission.submission_validator(file_path = submission_file)
+    validated_submission, num_images = solafune_dataset.submission_validator(file_path = submission_file)
     assert validated_submission == "Valid"
     assert num_images == 50

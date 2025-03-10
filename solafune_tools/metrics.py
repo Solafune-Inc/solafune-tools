@@ -2,8 +2,9 @@ from shapely.geometry import Polygon
 import numpy as np
 from tqdm import tqdm
 from rasterio.features import rasterize
+from typing import Union
 
-def bbox_to_polygon(bbox: list) -> Polygon:
+def bbox_to_polygon(bbox: Union[tuple, list]) -> Polygon:
     """
     Converts a bounding box into a polygon.
 
@@ -33,7 +34,7 @@ class IOUBasedMetrics:
         union = polygon1.union(polygon2).area
         return intersection / union if union > 0 else 0
 
-    def match_polygons(self, gt_polygons: list, pred_polygons: list, iou_threshold=0.5):
+    def match_polygons(self, gt_polygons: list, pred_polygons: list, iou_threshold=0.5) -> tuple:
         """
         Matches ground truth polygons with predicted polygons based on IoU threshold.
         """
@@ -124,7 +125,7 @@ class PixelBasedMetrics:
     def __init__(self) -> None:
         pass
 
-    def polygons_to_mask(self, polygons, array_dim):
+    def polygons_to_mask(self, polygons, array_dim) -> np.ndarray:
         """
         Converts a list of polygons into a binary mask.
         
@@ -139,7 +140,7 @@ class PixelBasedMetrics:
         mask = rasterize(shapes, out_shape=array_dim, fill=0, dtype=np.uint8)
         return mask
 
-    def compute_f1(self, gt_polygons, pred_polygons, array_dim=(1024, 1024)):
+    def compute_f1(self, gt_polygons, pred_polygons, array_dim=(1024, 1024)) -> tuple:
         """
         Compute the F1 score, precision, and recall for the given ground truth and predicted polygons.
         

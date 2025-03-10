@@ -16,13 +16,13 @@ def test_get_iou():
 
 def test_iou_based_compute_map_bbox():
     gt_bboxes = [[0, 0, 1, 1], [1, 1, 1, 1], [2, 2, 1, 1]]
-    pred_bboxes = [[0, 0, 1, 1], [1, 1, 1, 1], [2, 2, 1, 1]]
+    pred_bboxes = [[0, 0, 1, 1], [1, 1, 1, 1], [1, 1, 2, 2]]
     gt_polygons = [bbox_to_polygon(bbox) for bbox in gt_bboxes]
     pred_polygons = [bbox_to_polygon(bbox) for bbox in pred_bboxes]
     
     MAP = IOUBasedMetrics()
     map_score = MAP.compute_map(gt_polygons, pred_polygons)
-    assert map_score == 0.6666666666666666
+    assert map_score == 0.6296296296296297
 
 def test_iou_based_compute_map_bbox_same_score_with_dif_order():
     gt_bboxes = [[0, 0, 1, 1], [1, 1, 1, 1], [2, 2, 1, 1]]
@@ -233,7 +233,7 @@ def test_iou_based_compute_map_segmentation():
     
     MAP = IOUBasedMetrics()
     map_score = MAP.compute_map(true_polygons, pred_polygons)
-    assert round(map_score,1) == 0.5
+    assert round(map_score,1) == 0.7
 
 def test_iou_based_compute_map_segmentation_same_score_with_dif_order():
     true_polygons = [

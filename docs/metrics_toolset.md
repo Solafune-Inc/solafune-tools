@@ -17,6 +17,29 @@ Solafune Username: sitoa
 
 #### Gettin Started with PQ score
 
+##### Object Detection Task
+
+```python
+from solafune_tools.metrics import IOUBasedMetrics, bbox_to_polygon
+PQ = IOUBasedMetrics()
+
+bbox1 = (1, 2, 3, 4)
+bbox2 = (0, 0, 2, 3)
+bbox3 = (5, 5, 7, 6)
+bbox4 = (2, 2, 4, 4)
+
+ground_truth_bboxes = [bbox_to_polygon(bbox1), bbox_to_polygon(bbox2)]
+prediction_bboxes = [bbox_to_polygon(bbox3), bbox_to_polygon(bbox4)]
+
+pq, sq, rq = PQ.compute_pq(ground_truth_polygons, prediction_polygons, iou_threshold=0.5)
+
+print("PQ: ", pq)
+print("SQ: ", sq)
+print("RQ: ", rq)
+```
+
+##### Segmetation Task
+
 ```python
 from shapely.geometry import Polygon
 from solafune_tools.metrics import IOUBasedMetrics
@@ -63,6 +86,29 @@ Solafune username: Fulankun1412
 
 #### Gettin Started with F1 score
 
+##### Object Detection Task
+
+```python
+from solafune_tools.metrics import IOUBasedMetrics, bbox_to_polygon
+F1_score = IOUBasedMetrics()
+
+bbox1 = (1, 2, 3, 4)
+bbox2 = (0, 0, 2, 3)
+bbox3 = (5, 5, 7, 6)
+bbox4 = (2, 2, 4, 4)
+
+ground_truth_bboxes = [bbox_to_polygon(bbox1), bbox_to_polygon(bbox2)]
+prediction_bboxes = [bbox_to_polygon(bbox3), bbox_to_polygon(bbox4)]
+
+f1, precision, recall = F1_score.compute_f1(ground_truth_bboxes, prediction_bboxes, iou_threshold=0.5)
+
+print("F1: ", f1)
+print("Precision: ", precision)
+print("Recall: ", recall)
+```
+
+##### Segmetation Task
+
 ```python
 from shapely.geometry import Polygon
 from solafune_tools.metrics import IOUBasedMetrics
@@ -99,6 +145,7 @@ https://shapely.readthedocs.io/en/stable/
 - recall: Recall value
 
 ### Mean Average Precision Function
+
 This function computes the Mean Average Precision (mAP) score, which is a common metric used to evaluate the performance of object detection models. The mAP score is calculated by averaging the precision scores at different recall levels. It provides a single value that summarizes the precision-recall trade-off for a given set of predictions and ground truth annotations. The mAP score ranges from 0 to 1, with 1 indicating perfect precision and recall.
 
 #### Authors Information
@@ -107,6 +154,27 @@ Author: Lanang Afkaar \
 Solafune username: Fulankun1412
 
 #### Getting Started with mAP score
+
+##### Object Detection Task
+
+```python
+from solafune_tools.metrics import IOUBasedMetrics, bbox_to_polygon
+mAP = IOUBasedMetrics()
+
+bbox1 = (1, 2, 3, 4)
+bbox2 = (0, 0, 2, 3)
+bbox3 = (5, 5, 7, 6)
+bbox4 = (2, 2, 4, 4)
+
+ground_truth_bboxes = [bbox_to_polygon(bbox1), bbox_to_polygon(bbox2)]
+prediction_bboxes = [bbox_to_polygon(bbox3), bbox_to_polygon(bbox4)]
+
+map_score = mAP.compute_map(ground_truth_polygons, prediction_polygons, iou_threshold=0.5)
+
+print("mAP: ", map_score)
+```
+
+##### Segmetation Task
 
 ```python
 from shapely.geometry import Polygon
@@ -151,6 +219,29 @@ Author: Lanang Afkaar \
 Solafune username: Fulankun1412
 
 #### Gettin Started with F1 score
+
+##### Object Detection Task
+
+```python
+from solafune_tools.metrics import PixelBasedMetrics, bbox_to_polygon
+F1_score = PixelBasedMetrics()
+
+bbox1 = (1, 2, 3, 4)
+bbox2 = (0, 0, 2, 3)
+bbox3 = (5, 5, 7, 6)
+bbox4 = (2, 2, 4, 4)
+
+ground_truth_bboxes = [bbox_to_polygon(bbox1), bbox_to_polygon(bbox2)]
+prediction_bboxes = [bbox_to_polygon(bbox3), bbox_to_polygon(bbox4)]
+
+f1, precision, recall = F1_score.compute_f1(ground_truth_bboxes, prediction_bboxes, iou_threshold=0.5)
+
+print("F1: ", f1)
+print("Precision: ", precision)
+print("Recall: ", recall)
+```
+
+##### Segmetation Task
 
 ```python
 from shapely.geometry import Polygon

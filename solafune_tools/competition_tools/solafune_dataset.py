@@ -23,13 +23,13 @@ def check_dict(p_dict: dict = None, ann_type: str = "segmentation"):
     Check the format of the prediction dictionaries.
     Error codes:
         0: No errors
-        1: Incorrect format, missing "images" key, or "images" is not a list
-        2: Incorrect format, image file name not found in ground truth from the prediction
-        3: Incorrect format, missing "annotations" key, or "annotations" is not a list in one of the images
-        4: Incorrect format, missing "bbox/segmentation" key, or "bbox/segmentation" is not a list in one of the annotations
-        5: Incorrect format, one of bbox/segmentation list length is less than 4 or not even in one of the annotations
-        6: Incorrect format, missing "class" key in one of the annotations
-        7: Incorrect format, missing "width" or "height" key in one of the images
+        1: Invalid format, missing "images" key, or "images" is not a list
+        2: Invalid format, image file name not found in ground truth from the prediction
+        3: Invalid format, missing "annotations" key, or "annotations" is not a list in one of the images
+        4: Invalid format, missing "bbox/segmentation" key, or "bbox/segmentation" is not a list in one of the annotations
+        5: Invalid format, one of bbox/segmentation list length is less than 4 or not even in one of the annotations
+        6: Invalid format, missing "class" key in one of the annotations
+        7: Invalid format, missing "width" or "height" key in one of the images
     """
     if not p_dict:
         return 1, None
@@ -85,31 +85,31 @@ def return_error_message(error_code: int, filetype: str = "json"):
     Set the error messages of the prediction dictionaries or zipfile.
     Error codes:
         0: No errors
-        1: Incorrect format, missing "images" key, or "images" is not a list
-        2: Incorrect format, no file_name key found in one of the images
-        3: Incorrect format, missing "annotations" key, or "annotations" is not a list in one of the images
-        4: Incorrect format, missing "bbox/segmentation" key, or "bbox/segmentation" is not a list in one of the annotations
-        5: Incorrect format, one of bbox/segmentation list length is less than 4 or not even in one of the annotations
-        6: Incorrect format, missing "class" key in one of the annotations
-        7: Incorrect format, missing "width" or "height" key in one of the images
+        1: Invalid format, missing "images" key, or "images" is not a list
+        2: Invalid format, no file_name key found in one of the images
+        3: Invalid format, missing "annotations" key, or "annotations" is not a list in one of the images
+        4: Invalid format, missing "bbox/segmentation" key, or "bbox/segmentation" is not a list in one of the annotations
+        5: Invalid format, one of bbox/segmentation list length is less than 4 or not even in one of the annotations
+        6: Invalid format, missing "class" key in one of the annotations
+        7: Invalid format, missing "width" or "height" key in one of the images
     """
     if filetype == "json":
         if error_code == 0:
-            return "The JSON format is correct."
+            return "Valid"
         elif error_code == 1:
-            return "Incorrect format, missing 'images' key, or 'images' is not a list."
+            return "Invalid format, missing 'images' key, or 'images' is not a list."
         elif error_code == 2:
-            return "Incorrect format, missing 'file_name' key in one of the images."
+            return "Invalid format, missing 'file_name' key in one of the images."
         elif error_code == 3:
-            return "Incorrect format, missing 'annotations' key, or 'annotations' is not a list in one of the images."
+            return "Invalid format, missing 'annotations' key, or 'annotations' is not a list in one of the images."
         elif error_code == 4:
-            return "Incorrect format, missing 'bbox/segmentation' key, or 'bbox/segmentation' is not a list in one of the annotations."
+            return "Invalid format, missing 'bbox/segmentation' key, or 'bbox/segmentation' is not a list in one of the annotations."
         elif error_code == 5:
-            return "Incorrect format, one of bbox/segmentation list length is less than 4 or not even in one of the annotations."
+            return "Invalid format, one of bbox/segmentation list length is less than 4 or not even in one of the annotations."
         elif error_code == 6:
-            return "Incorrect format, missing 'class' key in one of the annotations."
+            return "Invalid format, missing 'class' key in one of the annotations."
         elif error_code == 7:
-            return "Incorrect format, missing 'width' or 'height' key in one of the images."
+            return "Invalid format, missing 'width' or 'height' key in one of the images."
         
     elif filetype == "zip":
         if error_code == 1:

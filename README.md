@@ -14,7 +14,7 @@
 
 This library package is an integrated open-source tool for Solafune developers, Solafune hackers, scientists, engineers, students, and anyone interested in geospatial data analysis. The solafune-tools contain many tools to help you develop your analysis like downloading STAC catalogs and Sentinel-2 imagery (from Planetary Computer) and then assembling it into a cloudless mosaic, competition_tools, community_tools, and other tools in geospatial data analysis. Other tools also will be added in the future.
 
-### Jan 2025: Minor update on Metrics
+### March 2025: Added a new metric evaluation
 
 ## Quickstart
 

@@ -1,19 +1,19 @@
-# Panoptic Quality Submission Validator
+# Solafune Dataset Submission Validator
 
-Panoptic Quality Submission or PQS for short is one of the metrics we use for evaluating user submissions to the solafune's submission website. This tool can be used to help you validate whether your submission complies or not with our JSON schema.
+Solafune Dataset Submission Validator is a tool we can use for evaluating user submissions to the solafune's submission website. This tool can be used to help you validate whether your submission complies or not with our JSON schema.
 
 ## Usage
 
 Using cli-base method
 
 ```bash
-python pq_scoring_submission.py --input_path input.json # Insert your JSON file
+python solafune_dataset.py --input_path sample_submission.json --ann_type segmentation # Insert your JSON file
 ```
 
 Using library-base function
 
 ```python
-from solafune_tools.competition_tools import pq_scoring_submission
+from solafune_tools.competition_tools import solafune_dataset
 
 # From variable
 submission_dict = {
@@ -47,11 +47,11 @@ submission_dict = {
         }
     ]
 }
-validated_submission, number_of_images = pq_scoring_submission.submission_validator(pdict = submission_dict)
+validated_submission, number_of_images = solafune_dataset.json_submission_validator(pdict = submission_dict, ann_type = "segmentation")
 print(validated_submission)
 
 # From saved file
 submission_file = "path/to/your/file.json"
-validated_submission, number_of_images = pq_scoring_submission.submission_validator(file_path = submission_file)
+validated_submission, number_of_images = pq_scoring_submission.submission_validator(file_path = submission_file, ann_type = "segmentation")
 print(validated_submission)
 ```

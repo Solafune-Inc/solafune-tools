@@ -1,4 +1,4 @@
-dask==2024.2.1
+dask==2025.2.0
 geopandas==0.14.3
 Pillow==9.5.0
 planetary_computer==1.0.0

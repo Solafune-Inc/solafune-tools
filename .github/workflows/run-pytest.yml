@@ -12,12 +12,17 @@ on:
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v3
-      - name: Setup python 3.10
-        uses: actions/setup-python@v2
+      
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: ${{ matrix.python-version }}
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -25,8 +30,9 @@ jobs:
           uv venv
           uv pip install -r requirements.txt
           uv pip install pytest
+      
       - name: Run PyTest
         shell: bash
-        run: | 
+        run: |
           source .venv/bin/activate
           pytest

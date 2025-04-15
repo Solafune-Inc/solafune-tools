@@ -6,3 +6,4 @@ data
 dist
 solafune_tools.egg-info
 solafune_tools/junk.py
+build/

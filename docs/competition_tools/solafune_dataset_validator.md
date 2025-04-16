@@ -7,7 +7,7 @@ Solafune Dataset Submission Validator is a tool we can use for evaluating user s
 Using cli-base method
 
 ```bash
-python solafune_dataset.py --input_path sample_submission.json --ann_type segmentation # Insert your JSON file
+python solafune_dataset.py --file_path sample_submission.json --ann_type segmentation # Insert your JSON file
 ```
 
 Using library-base function

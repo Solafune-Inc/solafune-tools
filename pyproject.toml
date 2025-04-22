@@ -1,6 +1,6 @@
 [project]
 name = "solafune-tools"
-version = "0.7.0"
+version = "0.7.1"
 description = "Open tools for Solafune developers and Solafune hackers where can share developed tools in geospatial data"
 authors = [
     {name = "Pushkar Kopparla", email = "pushkar.kopparla@solafune.com"},

@@ -60,7 +60,7 @@ print("SQ: ", sq)
 print("RQ: ", rq)
 ```
 
-#### Input
+#### Function Input Parameters
 
 - ground_truth_polygons: List of polygons representing the ground truth segmentation.
 - prediction_polygons: List of polygons representing the predicted segmentation.
@@ -129,7 +129,7 @@ print("Precision: ", precision)
 print("Recall: ", recall)
 ```
 
-#### Input
+#### Function Input Parameters
 
 - ground_truth_polygons: List of polygons representing the ground truth segmentation.
 - prediction_polygons: List of polygons representing the predicted segmentation.
@@ -143,6 +143,92 @@ https://shapely.readthedocs.io/en/stable/
 - f1: F1 score
 - precision: Precision value
 - recall: Recall value
+
+### F-Beta Score Compute Function
+
+This function computes the **F-Beta Score**, which is an extension of the F1 score and is particularly useful for segmentation tasks. The F-Beta score balances precision and recall using a configurable `beta` parameter:
+
+- `beta < 1`: More weight on **precision**
+- `beta > 1`: More weight on **recall**
+- `beta = 1`: Equivalent to the **F1 score**
+
+The computation is based on the Intersection over Union (IoU) metric between polygons, making it ideal for tasks such as semantic segmentation, instance segmentation, and object detection, especially in cases involving imbalanced datasets.
+
+---
+
+##### Authors Information
+
+Author: Lanang Afkaar \  
+Solafune username: Fulankun1412
+
+---
+
+##### Getting Started with F-Beta Score
+
+###### Object Detection Task
+
+```python
+from solafune_tools.metrics import IOUBasedMetrics, bbox_to_polygon
+F_beta_score = IOUBasedMetrics()
+
+bbox1 = (1, 2, 3, 4)
+bbox2 = (0, 0, 2, 3)
+bbox3 = (5, 5, 7, 6)
+bbox4 = (2, 2, 4, 4)
+
+ground_truth_bboxes = [bbox_to_polygon(bbox1), bbox_to_polygon(bbox2)]
+prediction_bboxes = [bbox_to_polygon(bbox3), bbox_to_polygon(bbox4)]
+
+f_beta, precision, recall = F_beta_score.compute_fbeta(
+    ground_truth_bboxes, prediction_bboxes, iou_threshold=0.5, beta=0.5
+)
+
+print("F-Beta: ", f_beta)
+print("Precision: ", precision)
+print("Recall: ", recall)
+```
+
+##### Segmentation Task
+
+```python
+from shapely.geometry import Polygon
+from solafune_tools.metrics import IOUBasedMetrics
+F_beta_score = IOUBasedMetrics()
+
+polygon1 = Polygon([(1, 2), (2, 4), (3, 1)])
+polygon2 = Polygon([(0, 0), (1, 3), (2, 2), (3, 0)])
+polygon3 = Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3)])
+polygon4 = Polygon([(2, 2), (3, 4), (4, 4), (5, 2), (3, 1)])
+
+ground_truth_polygons = [polygon1, polygon2]
+prediction_polygons = [polygon3, polygon4]
+
+f_beta, precision, recall = F_beta_score.compute_fbeta(
+    ground_truth_polygons, prediction_polygons, iou_threshold=0.5, beta=2.0
+)
+
+print("F-Beta: ", f_beta)
+print("Precision: ", precision)
+print("Recall: ", recall)
+```
+
+---
+
+#### Function Input Parameters
+
+- ground_truth_polygons: List of `shapely.geometry.Polygon` objects representing the ground truth.
+- prediction_polygons: List of `shapely.geometry.Polygon` objects representing the predicted segmentation or bounding boxes.
+- iou_threshold: Threshold for Intersection over Union (IoU) to consider a prediction as a match. Default is `0.5`.
+- beta: The weight of recall in the combined score. Default is `1.0` (F1 score).
+
+polygons is shapely.geometry.Polygon object
+https://shapely.readthedocs.io/en/stable/
+
+#### Output
+
+- f_beta: The computed F-Beta score.
+- precision`: The precision value based on IoU matches.
+- recall: The recall value based on IoU matches.
 
 ### Mean Average Precision Function
 
@@ -166,8 +252,11 @@ bbox2 = (0, 0, 2, 3)
 bbox3 = (5, 5, 7, 6)
 bbox4 = (2, 2, 4, 4)
 
+conf_score3 = 0.6
+conf_score4 = 0.87
+
 ground_truth_bboxes = [bbox_to_polygon(bbox1), bbox_to_polygon(bbox2)]
-prediction_bboxes = [bbox_to_polygon(bbox3), bbox_to_polygon(bbox4)]
+prediction_bboxes = [[bbox_to_polygon(bbox3), conf_score3], [bbox_to_polygon(bbox4), conf_score4]]
 
 map_score = mAP.compute_map(ground_truth_polygons, prediction_polygons, iou_threshold=0.5)
 
@@ -186,19 +275,22 @@ polygon2 = Polygon([(0, 0), (1, 3), (2, 2), (3, 0)])
 polygon3 = Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3)])
 polygon4 = Polygon([(2, 2), (3, 4), (4, 4), (5, 2), (3, 1)])
 
+conf_score3 = 0.66
+conf_score4 = 0.77
+
 ground_truth_polygons = [polygon1, polygon2]
-prediction_polygons = [polygon3, polygon4]
+prediction_polygons = [[polygon3, conf_score3], [polygon4, conf_score4]]
 
 map_score = mAP.compute_map(ground_truth_polygons, prediction_polygons, iou_threshold=0.5)
 
 print("mAP: ", map_score)
 ```
 
-#### Input
+#### Function Input Parameters
 
 - ground_truth_polygons: List of polygons representing the ground truth segmentation.
-- prediction_polygons: List of polygons representing the predicted segmentation.
-- iou_threshold: Threshold for the Intersection over Union. default is [0.5, 0.95, 0.05]
+- prediction_polygons: List of tuple of polygons representing the predicted segmentation and confidence score of the polygon.
+- iou_threshold: Threshold for the Intersection over Union. default is [0.5, 0.7, 0.95]
 
 polygons is shapely.geometry.Polygon object
 https://shapely.readthedocs.io/en/stable/
@@ -263,7 +355,7 @@ print("Precision: ", precision)
 print("Recall: ", recall)
 ```
 
-#### Input
+#### Function Input Parameters
 
 - ground_truth_polygons: List of polygons representing the ground truth segmentation.
 - prediction_polygons: List of polygons representing the predicted segmentation.

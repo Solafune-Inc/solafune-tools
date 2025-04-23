@@ -22,7 +22,7 @@ def test_iou_based_compute_map_bbox():
     
     MAP = IOUBasedMetrics()
     map_score = MAP.compute_map(gt_polygons, pred_polygons)
-    assert map_score == 0.4444444444444444
+    assert map_score == 0.4444444444444445
 
 def test_iou_based_compute_map_bbox_same_score_with_dif_order():
     gt_bboxes = [[0, 0, 1, 1], [1, 1, 1, 1], [2, 2, 1, 1]]

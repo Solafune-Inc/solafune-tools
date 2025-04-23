@@ -370,3 +370,80 @@ print("Recall: ", recall)
 - `f1`: F1 score
 - `precision`: Precision value
 - `recall`: Recall value
+
+### ⚖️ F-Beta Score Compute Function (Pixel Level)
+
+This function computes the **F-Beta Score** at the **pixel level**, allowing for a fine-grained evaluation of segmentation tasks. The `beta` parameter adjusts the balance between precision and recall:
+
+- 🔹 `beta < 1`: More weight on **precision**
+- 🔸 `beta > 1`: More weight on **recall**
+- ⚖️ `beta = 1`: Equivalent to **F1 score**
+
+#### 👤 Authors Information
+
+- **Author**: Lanang Afkaar  
+- **Solafune Username**: `Fulankun1412`
+
+#### 🚀 Getting Started with F-Beta Score
+
+##### 🟥 Object Detection Task
+
+```python
+from solafune_tools.metrics import PixelBasedMetrics, bbox_to_polygon
+F_beta_score = PixelBasedMetrics()
+
+bbox1 = (1, 2, 3, 4)
+bbox2 = (0, 0, 2, 3)
+bbox3 = (5, 5, 7, 6)
+bbox4 = (2, 2, 4, 4)
+
+ground_truth_bboxes = [bbox_to_polygon(bbox1), bbox_to_polygon(bbox2)]
+prediction_bboxes = [bbox_to_polygon(bbox3), bbox_to_polygon(bbox4)]
+
+f_beta, precision, recall = F_beta_score.compute_fbeta(
+    ground_truth_bboxes, prediction_bboxes, beta=0.5
+)
+
+print("F-Beta: ", f_beta)
+print("Precision: ", precision)
+print("Recall: ", recall)
+```
+
+##### 🟩 Segmentation Task
+
+```python
+from shapely.geometry import Polygon
+from solafune_tools.metrics import PixelBasedMetrics
+F_beta_score = PixelBasedMetrics()
+
+polygon1 = Polygon([(1, 2), (2, 4), (3, 1)])
+polygon2 = Polygon([(0, 0), (1, 3), (2, 2), (3, 0)])
+polygon3 = Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3)])
+polygon4 = Polygon([(2, 2), (3, 4), (4, 4), (5, 2), (3, 1)])
+
+ground_truth_polygons = [polygon1, polygon2]
+prediction_polygons = [polygon3, polygon4]
+
+f_beta, precision, recall = F_beta_score.compute_fbeta(
+    ground_truth_polygons, prediction_polygons, beta=2.0
+)
+
+print("F-Beta: ", f_beta)
+print("Precision: ", precision)
+print("Recall: ", recall)
+```
+
+#### 🔧 Function Input Parameters
+
+- `ground_truth_polygons`: List of polygons representing the ground truth segmentation.
+- `prediction_polygons`: List of polygons representing predictions.
+- `beta`: Weight of recall in the combined score. Default is `1.0`.
+
+➡️ Polygons are `shapely.geometry.Polygon` objects  
+📚 https://shapely.readthedocs.io/en/stable/
+
+#### 📤 Output
+
+- `f_beta`: F-Beta score
+- `precision`: Precision value
+- `recall`: Recall value

@@ -339,3 +339,51 @@ class PixelBasedMetrics:
         
         return f1, precision, recall
     
+    def compute_fbeta(self, gt_polygons, pred_polygons, beta: float, array_dim=(1024, 1024)) -> tuple:
+        """
+        Compute the F-beta score, precision, and recall for the given ground truth and predicted polygons.
+
+        The F-beta score weights recall more than precision by a factor of beta.
+        beta=1.0 is the standard F1 score.
+        beta<1.0 weights precision more, beta>1.0 weights recall more.
+
+        Args:
+            gt_polygons (list): List of ground truth polygons.
+            pred_polygons (list): List of predicted polygons.
+            beta (float): The weight factor for recall. Must be positive.
+            array_dim (tuple, optional): Dimensions of the output mask (height, width). Defaults to (1024, 1024).
+
+        Returns:
+            tuple: A tuple containing:
+                - fbeta (float): The F-beta score.
+                - precision (float): The precision score (TP / (TP + FP)).
+                - recall (float): The recall score (TP / (TP + FN)).
+
+        Raises:
+            ValueError: If beta is not positive.
+        """
+        if beta <= 0:
+            raise ValueError("Beta must be positive.")
+
+        # Create binary masks for ground truth and predictions
+        gt_mask = self.polygons_to_mask(gt_polygons, array_dim)
+        pred_mask = self.polygons_to_mask(pred_polygons, array_dim)
+
+        # Calculate pixel-level True Positives (TP), False Positives (FP), and False Negatives (FN)
+        tp = np.sum((gt_mask == 1) & (pred_mask == 1))
+        fp = np.sum((gt_mask == 0) & (pred_mask == 1))
+        fn = np.sum((gt_mask == 1) & (pred_mask == 0))
+
+        # Calculate precision and recall
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 1.0  # if no prediction, precision is considered as 1
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 1.0  # if no ground truth, recall is considered as 1
+
+        # F-beta calculation
+        beta_sq = beta**2
+        fbeta_denominator = (beta_sq * precision) + recall
+        if fbeta_denominator > 0:
+            fbeta = (1 + beta_sq) * (precision * recall) / fbeta_denominator
+        else:
+            fbeta = 0.0  # If precision and recall are both 0
+
+        return fbeta, precision, recall

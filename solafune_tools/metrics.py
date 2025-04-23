@@ -227,7 +227,7 @@ class IOUBasedMetrics:
 
         # Default IoU thresholds: COCO standard [0.5, 0.55, ..., 0.95]
         if iou_thresholds is None:
-            iou_thresholds = np.arange(0.5, 0.7, 0.95)
+            iou_thresholds = np.arange(0.5, 1.0, 0.05).tolist()
         elif isinstance(iou_thresholds, (float, int)):
             iou_thresholds = [float(iou_thresholds)]
         iou_thresholds = np.array(iou_thresholds)

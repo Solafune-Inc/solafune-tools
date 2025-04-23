@@ -1,5 +1,6 @@
 from shapely.geometry import Polygon
 from solafune_tools.metrics import IOUBasedMetrics, PixelBasedMetrics, bbox_to_polygon
+import math
 
 # ---------------------> The test below is for the IOUBasedMetrics class
 
@@ -251,8 +252,8 @@ def test_iou_based_fbeta_score_segmentation_same_score_with_dif_order():
     true_order_2 = [0]
     pred_order_2 = [1]
     Fbeta = IOUBasedMetrics()
-    fbeta_score_1 = Fbeta.compute_fbeta([true_polygons[i] for i in true_order_1], [pred_polygons[i] for i in pred_order_1], beta=1)
-    fbeta_score_2 = Fbeta.compute_fbeta([true_polygons[i] for i in true_order_2], [pred_polygons[i] for i in pred_order_2], beta=1)
+    fbeta_score_1, _, _ = Fbeta.compute_fbeta([true_polygons[i] for i in true_order_1], [pred_polygons[i] for i in pred_order_1], beta=1)
+    fbeta_score_2, _, _ = Fbeta.compute_fbeta([true_polygons[i] for i in true_order_2], [pred_polygons[i] for i in pred_order_2], beta=1)
     
     assert math.isclose(fbeta_score_1, fbeta_score_2, rel_tol=1e-9)
 

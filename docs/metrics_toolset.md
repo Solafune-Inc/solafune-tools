@@ -1,23 +1,23 @@
-# Metrics Toolset
+# 📊 Metrics Toolset
 
 In this repository we also add metrics toolset to accomodate user to be able use metrics we use usually for model training or model evaluation.
 
 ## IOU-Based Metrics
 
-### Panoptic Qualities Score Compute Function
+### 🧠 Panoptic Qualities Score Compute Function
 
-This function computes the Panoptic Qualities (PQ) score which leveraged Intersection Over Union (IoU) for a given set of predictions and ground truth polygons. The PQ score is a metric used to evaluate the quality of panoptic segmentation models. The PQ score is computed as the sum of the PQ scores for each class in the dataset. The PQ score for a class is computed as the sum of the true positive, false positive, and false negative values for that class. The PQ score is then normalized by the sum of the true positive and false negative values for that class. The PQ score is a value between 0 and 1, with 1 being the best possible score.
+This function computes the **Panoptic Qualities (PQ)** score which leverages **Intersection Over Union (IoU)** for a given set of predictions and ground truth polygons. The **PQ score** is a metric used to evaluate the quality of panoptic segmentation models. The PQ score is computed as the sum of the PQ scores for each class in the dataset. The PQ score for a class is computed as the sum of the true positive, false positive, and false negative values for that class. The PQ score is then normalized by the sum of the true positive and false negative values for that class. The PQ score is a value between **0 and 1**, with **1 being the best possible score**.
 
-[Paper Implementation](https://arxiv.org/abs/1801.00868)
+📄 [Paper Implementation](https://arxiv.org/abs/1801.00868)
 
-#### Authors information
+#### 👤 Authors Information
 
-Author: Toru Mitsutake(Solafune) \
-Solafune Username: sitoa
+- **Author**: Toru Mitsutake (Solafune)  
+- **Solafune Username**: `sitoa`
 
-#### Gettin Started with PQ score
+#### 🚀 Getting Started with PQ score
 
-##### Object Detection Task
+##### 🟥 Object Detection Task
 
 ```python
 from solafune_tools.metrics import IOUBasedMetrics, bbox_to_polygon
@@ -38,7 +38,7 @@ print("SQ: ", sq)
 print("RQ: ", rq)
 ```
 
-##### Segmetation Task
+##### 🟩 Segmentation Task
 
 ```python
 from shapely.geometry import Polygon
@@ -60,33 +60,35 @@ print("SQ: ", sq)
 print("RQ: ", rq)
 ```
 
-#### Input
+#### 🔧 Function Input Parameters
 
-- ground_truth_polygons: List of polygons representing the ground truth segmentation.
-- prediction_polygons: List of polygons representing the predicted segmentation.
-- iou_threshold: Threshold for the Intersection over Union. default is 0.5
+- `ground_truth_polygons`: List of polygons representing the ground truth segmentation.
+- `prediction_polygons`: List of polygons representing the predicted segmentation.
+- `iou_threshold`: Threshold for the **Intersection over Union**. Default is `0.5`
 
-polygons is shapely.geometry.Polygon object
-https://shapely.readthedocs.io/en/stable/
+➡️ Polygons are `shapely.geometry.Polygon` objects  
+📚 https://shapely.readthedocs.io/en/stable/
 
-#### Output
+#### 📤 Output
 
-- pq: Panoptic Quality score
-- sq: Segmentation Quality score
-- rq: Recognition Quality score
+- `pq`: **Panoptic Quality** score
+- `sq`: **Segmentation Quality** score
+- `rq`: **Recognition Quality** score
 
-### F1 Score Compute Function
+---
 
-This function computes the F1 score which leveraged Intersection Over Union (IoU) , specifically tailored for segmentation tasks, to evaluate the quality of predictions against the ground truth polygons. The F1 score, often referred to as the Dice coefficient in segmentation, is a metric that quantifies the overlap between predicted and ground-truth masks. The score ranges from 0 to 1, where 1 indicates a perfect match between predicted and ground-truth masks. This metric is particularly useful for semantic and instance segmentation tasks, especially when handling imbalanced datasets or when high precision and recall are equally critical.
+### 🧪 F1 Score Compute Function
 
-#### Authors Information
+This function computes the **F1 score** which leverages **Intersection Over Union (IoU)**, specifically tailored for **segmentation tasks**, to evaluate the quality of predictions against the ground truth polygons. The **F1 score** (also known as the **Dice coefficient**) quantifies the **overlap** between predicted and ground-truth masks. Ranges from **0 to 1**, with **1 being a perfect match**. Useful especially when **precision and recall are equally important**.
 
-Author: Lanang Afkaar \
-Solafune username: Fulankun1412
+#### 👤 Authors Information
 
-#### Gettin Started with F1 score
+- **Author**: Lanang Afkaar  
+- **Solafune Username**: `Fulankun1412`
 
-##### Object Detection Task
+#### 🚀 Getting Started with F1 Score
+
+##### 🟥 Object Detection Task
 
 ```python
 from solafune_tools.metrics import IOUBasedMetrics, bbox_to_polygon
@@ -107,7 +109,7 @@ print("Precision: ", precision)
 print("Recall: ", recall)
 ```
 
-##### Segmetation Task
+##### 🟩 Segmentation Task
 
 ```python
 from shapely.geometry import Polygon
@@ -129,33 +131,117 @@ print("Precision: ", precision)
 print("Recall: ", recall)
 ```
 
-#### Input
+#### 🔧 Function Input Parameters
 
-- ground_truth_polygons: List of polygons representing the ground truth segmentation.
-- prediction_polygons: List of polygons representing the predicted segmentation.
-- iou_threshold: Threshold for the Intersection over Union. default is 0.5
+- `ground_truth_polygons`: List of polygons representing the ground truth segmentation.
+- `prediction_polygons`: List of polygons representing the predicted segmentation.
+- `iou_threshold`: Threshold for the **Intersection over Union**. Default is `0.5`
 
-polygons is shapely.geometry.Polygon object
-https://shapely.readthedocs.io/en/stable/
+➡️ Polygons are `shapely.geometry.Polygon` objects  
+📚 https://shapely.readthedocs.io/en/stable/
 
-#### Output
+#### 📤 Output
 
-- f1: F1 score
-- precision: Precision value
-- recall: Recall value
+- `f1`: F1 score
+- `precision`: Precision value
+- `recall`: Recall value
 
-### Mean Average Precision Function
+---
 
-This function computes the Mean Average Precision (mAP) score, which is a common metric used to evaluate the performance of object detection models. The mAP score is calculated by averaging the precision scores at different recall levels. It provides a single value that summarizes the precision-recall trade-off for a given set of predictions and ground truth annotations. The mAP score ranges from 0 to 1, with 1 indicating perfect precision and recall.
+### ⚖️ F-Beta Score Compute Function
 
-#### Authors Information
+This function computes the **F-Beta Score**, an extension of F1 score that **balances precision and recall** via a tunable `beta` parameter:
 
-Author: Lanang Afkaar \
-Solafune username: Fulankun1412
+- 🔹 `beta < 1`: More weight on **precision**
+- 🔸 `beta > 1`: More weight on **recall**
+- ⚖️ `beta = 1`: Equivalent to **F1 score**
 
-#### Getting Started with mAP score
+Ideal for tasks like **semantic segmentation**, **instance segmentation**, and **object detection**, especially when managing **imbalanced datasets**.
 
-##### Object Detection Task
+#### 👤 Authors Information
+
+- **Author**: Lanang Afkaar  
+- **Solafune Username**: `Fulankun1412`
+
+#### 🚀 Getting Started with F-Beta Score
+
+##### 🟥 Object Detection Task
+
+```python
+from solafune_tools.metrics import IOUBasedMetrics, bbox_to_polygon
+F_beta_score = IOUBasedMetrics()
+
+bbox1 = (1, 2, 3, 4)
+bbox2 = (0, 0, 2, 3)
+bbox3 = (5, 5, 7, 6)
+bbox4 = (2, 2, 4, 4)
+
+ground_truth_bboxes = [bbox_to_polygon(bbox1), bbox_to_polygon(bbox2)]
+prediction_bboxes = [bbox_to_polygon(bbox3), bbox_to_polygon(bbox4)]
+
+f_beta, precision, recall = F_beta_score.compute_fbeta(
+    ground_truth_bboxes, prediction_bboxes, iou_threshold=0.5, beta=0.5
+)
+
+print("F-Beta: ", f_beta)
+print("Precision: ", precision)
+print("Recall: ", recall)
+```
+
+##### 🟩 Segmentation Task
+
+```python
+from shapely.geometry import Polygon
+from solafune_tools.metrics import IOUBasedMetrics
+F_beta_score = IOUBasedMetrics()
+
+polygon1 = Polygon([(1, 2), (2, 4), (3, 1)])
+polygon2 = Polygon([(0, 0), (1, 3), (2, 2), (3, 0)])
+polygon3 = Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3)])
+polygon4 = Polygon([(2, 2), (3, 4), (4, 4), (5, 2), (3, 1)])
+
+ground_truth_polygons = [polygon1, polygon2]
+prediction_polygons = [polygon3, polygon4]
+
+f_beta, precision, recall = F_beta_score.compute_fbeta(
+    ground_truth_polygons, prediction_polygons, iou_threshold=0.5, beta=2.0
+)
+
+print("F-Beta: ", f_beta)
+print("Precision: ", precision)
+print("Recall: ", recall)
+```
+
+#### 🔧 Function Input Parameters
+
+- `ground_truth_polygons`: List of `shapely.geometry.Polygon` objects representing the ground truth.
+- `prediction_polygons`: List of `shapely.geometry.Polygon` objects representing predictions.
+- `iou_threshold`: IoU threshold to consider a prediction a match. Default is `0.5`.
+- `beta`: Weight of recall in the combined score. Default is `1.0`.
+
+➡️ Polygons are `shapely.geometry.Polygon` objects  
+📚 https://shapely.readthedocs.io/en/stable/
+
+#### 📤 Output
+
+- `f_beta`: F-Beta score
+- `precision`: Precision value
+- `recall`: Recall value
+
+---
+
+### 🥇 Mean Average Precision Function
+
+This function computes **Mean Average Precision (mAP)**, a widely-used metric in **object detection**. It summarizes the **precision-recall** trade-off across various **IoU thresholds**.
+
+#### 👤 Authors Information
+
+- **Author**: Lanang Afkaar  
+- **Solafune Username**: `Fulankun1412`
+
+#### 🚀 Getting Started with mAP Score
+
+##### 🟥 Object Detection Task
 
 ```python
 from solafune_tools.metrics import IOUBasedMetrics, bbox_to_polygon
@@ -166,15 +252,18 @@ bbox2 = (0, 0, 2, 3)
 bbox3 = (5, 5, 7, 6)
 bbox4 = (2, 2, 4, 4)
 
+conf_score3 = 0.6
+conf_score4 = 0.87
+
 ground_truth_bboxes = [bbox_to_polygon(bbox1), bbox_to_polygon(bbox2)]
-prediction_bboxes = [bbox_to_polygon(bbox3), bbox_to_polygon(bbox4)]
+prediction_bboxes = [[bbox_to_polygon(bbox3), conf_score3], [bbox_to_polygon(bbox4), conf_score4]]
 
 map_score = mAP.compute_map(ground_truth_polygons, prediction_polygons, iou_threshold=0.5)
 
 print("mAP: ", map_score)
 ```
 
-##### Segmetation Task
+##### 🟩 Segmentation Task
 
 ```python
 from shapely.geometry import Polygon
@@ -186,41 +275,46 @@ polygon2 = Polygon([(0, 0), (1, 3), (2, 2), (3, 0)])
 polygon3 = Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3)])
 polygon4 = Polygon([(2, 2), (3, 4), (4, 4), (5, 2), (3, 1)])
 
+conf_score3 = 0.66
+conf_score4 = 0.77
+
 ground_truth_polygons = [polygon1, polygon2]
-prediction_polygons = [polygon3, polygon4]
+prediction_polygons = [[polygon3, conf_score3], [polygon4, conf_score4]]
 
 map_score = mAP.compute_map(ground_truth_polygons, prediction_polygons, iou_threshold=0.5)
 
 print("mAP: ", map_score)
 ```
 
-#### Input
+#### 🔧 Function Input Parameters
 
-- ground_truth_polygons: List of polygons representing the ground truth segmentation.
-- prediction_polygons: List of polygons representing the predicted segmentation.
-- iou_threshold: Threshold for the Intersection over Union. default is [0.5, 0.95, 0.05]
+- `ground_truth_polygons`: List of polygons representing the ground truth.
+- `prediction_polygons`: List of tuples: (`Polygon`, `confidence_score`)
+- `iou_threshold`: List of IoU thresholds. Default is `[0.5, 0.7, 0.95]`
 
-polygons is shapely.geometry.Polygon object
-https://shapely.readthedocs.io/en/stable/
+➡️ Polygons are `shapely.geometry.Polygon` objects  
+📚 https://shapely.readthedocs.io/en/stable/
 
-#### Output
+#### 📤 Output
 
-- map_score: Mean Average Precision score
+- `map_score`: **Mean Average Precision** score
 
-## Pixel-Based Metrics
+---
 
-### F1 Score Compute Function
+## 🧵 Pixel-Based Metrics
 
-This function computes the F1 score which leveraged Pixel-level evaluation, specifically tailored for segmentation tasks, to evaluate the quality of predictions against the ground truth polygons. The F1 score, often referred to as the Dice coefficient in segmentation, is a metric that quantifies the overlap between predicted and ground-truth masks. The score ranges from 0 to 1, where 1 indicates a perfect match between predicted and ground-truth masks. This metric is particularly useful for semantic and instance segmentation tasks, especially when handling imbalanced datasets or when high precision and recall are equally critical.
+### 🧪 F1 Score Compute Function (Pixel Level)
 
-#### Authors Information
+Same logic as the IoU-based version but tailored for **pixel-wise** evaluation.
 
-Author: Lanang Afkaar \
-Solafune username: Fulankun1412
+#### 👤 Authors Information
 
-#### Gettin Started with F1 score
+- **Author**: Lanang Afkaar  
+- **Solafune Username**: `Fulankun1412`
 
-##### Object Detection Task
+#### 🚀 Getting Started with F1 Score
+
+##### 🟥 Object Detection Task
 
 ```python
 from solafune_tools.metrics import PixelBasedMetrics, bbox_to_polygon
@@ -241,7 +335,7 @@ print("Precision: ", precision)
 print("Recall: ", recall)
 ```
 
-##### Segmetation Task
+##### 🟩 Segmentation Task
 
 ```python
 from shapely.geometry import Polygon
@@ -263,16 +357,93 @@ print("Precision: ", precision)
 print("Recall: ", recall)
 ```
 
-#### Input
+#### 🔧 Function Input Parameters
 
-- ground_truth_polygons: List of polygons representing the ground truth segmentation.
-- prediction_polygons: List of polygons representing the predicted segmentation.
+- `ground_truth_polygons`: List of polygons representing the ground truth segmentation.
+- `prediction_polygons`: List of polygons representing predictions.
 
-polygons is shapely.geometry.Polygon object
-https://shapely.readthedocs.io/en/stable/
+➡️ Polygons are `shapely.geometry.Polygon` objects  
+📚 https://shapely.readthedocs.io/en/stable/
 
-#### Output
+#### 📤 Output
 
-- f1: F1 score
-- precision: Precision value
-- recall: Recall value
+- `f1`: F1 score
+- `precision`: Precision value
+- `recall`: Recall value
+
+### ⚖️ F-Beta Score Compute Function (Pixel Level)
+
+This function computes the **F-Beta Score** at the **pixel level**, allowing for a fine-grained evaluation of segmentation tasks. The `beta` parameter adjusts the balance between precision and recall:
+
+- 🔹 `beta < 1`: More weight on **precision**
+- 🔸 `beta > 1`: More weight on **recall**
+- ⚖️ `beta = 1`: Equivalent to **F1 score**
+
+#### 👤 Authors Information
+
+- **Author**: Lanang Afkaar  
+- **Solafune Username**: `Fulankun1412`
+
+#### 🚀 Getting Started with F-Beta Score
+
+##### 🟥 Object Detection Task
+
+```python
+from solafune_tools.metrics import PixelBasedMetrics, bbox_to_polygon
+F_beta_score = PixelBasedMetrics()
+
+bbox1 = (1, 2, 3, 4)
+bbox2 = (0, 0, 2, 3)
+bbox3 = (5, 5, 7, 6)
+bbox4 = (2, 2, 4, 4)
+
+ground_truth_bboxes = [bbox_to_polygon(bbox1), bbox_to_polygon(bbox2)]
+prediction_bboxes = [bbox_to_polygon(bbox3), bbox_to_polygon(bbox4)]
+
+f_beta, precision, recall = F_beta_score.compute_fbeta(
+    ground_truth_bboxes, prediction_bboxes, beta=0.5
+)
+
+print("F-Beta: ", f_beta)
+print("Precision: ", precision)
+print("Recall: ", recall)
+```
+
+##### 🟩 Segmentation Task
+
+```python
+from shapely.geometry import Polygon
+from solafune_tools.metrics import PixelBasedMetrics
+F_beta_score = PixelBasedMetrics()
+
+polygon1 = Polygon([(1, 2), (2, 4), (3, 1)])
+polygon2 = Polygon([(0, 0), (1, 3), (2, 2), (3, 0)])
+polygon3 = Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3)])
+polygon4 = Polygon([(2, 2), (3, 4), (4, 4), (5, 2), (3, 1)])
+
+ground_truth_polygons = [polygon1, polygon2]
+prediction_polygons = [polygon3, polygon4]
+
+f_beta, precision, recall = F_beta_score.compute_fbeta(
+    ground_truth_polygons, prediction_polygons, beta=2.0
+)
+
+print("F-Beta: ", f_beta)
+print("Precision: ", precision)
+print("Recall: ", recall)
+```
+
+#### 🔧 Function Input Parameters
+
+- `ground_truth_polygons`: List of polygons representing the ground truth segmentation.
+- `prediction_polygons`: List of polygons representing predictions.
+- `beta`: Weight of recall in the combined score. Default is `1.0`.
+
+➡️ Polygons are `shapely.geometry.Polygon` objects  
+📚 https://shapely.readthedocs.io/en/stable/
+
+#### 📤 Output
+
+- `f_beta`: F-Beta score
+- `precision`: Precision value
+- `recall`: Recall value

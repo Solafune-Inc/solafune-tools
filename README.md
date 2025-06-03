@@ -10,7 +10,7 @@
 
 </div>
 
-## Solafune-Tools: Open tools for Solafune developers and Solafune hackers where can share developed tools in geospatial data
+## Solafune-Tools: Open library for Solafune developers and hackers where you can share tools for geospatial data
 
 This library package is an integrated open-source tool for Solafune developers, Solafune hackers, scientists, engineers, students, and anyone interested in geospatial data analysis. The solafune-tools contain many tools to help you develop your analysis like downloading STAC catalogs and Sentinel-2 imagery (from Planetary Computer) and then assembling it into a cloudless mosaic, competition_tools, community_tools, and other tools in geospatial data analysis. Other tools also will be added in the future.
 

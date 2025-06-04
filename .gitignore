@@ -8,4 +8,6 @@ solafune_tools.egg-info
 solafune_tools/junk.py
 build/
 solafune_tools/osm/super_resolution/output/
-solafune_tools/osm/super_resolution/src
+solafune_tools/osm/super_resolution/src/
+solafune_tools/osm/super_resolution/datasets/
+solafune_tools/osm/super_resolution/working/

@@ -41,8 +41,8 @@ from pytorch_lightning import callbacks
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from config import CFG
-from preprocess import DatasetsDownload, CustomDataset, CustomDataLoaderModule, set_seed
-from common_utils import load_image_info, delete_if_file_exists, merge_inference
+from preprocess import CustomDataset, CustomDataLoaderModule, set_seed
+from common_utils import OSMResourceDownloader, load_image_info, delete_if_file_exists, merge_inference
 from model import SRModel, inferece_fn, valid_fn
 
 warnings.filterwarnings("ignore")
@@ -71,7 +71,7 @@ def train(using_own_dataset : bool = False,  gpus: Union[int, str, List] = 1,
     Returns:
         None
     """
-    dataset = DatasetsDownload()
+    dataset = OSMResourceDownloader()
     if using_own_dataset:
         dataset_folder_check = is_dataset_folder_exist()
         if not dataset_folder_check:
@@ -90,7 +90,7 @@ def train(using_own_dataset : bool = False,  gpus: Union[int, str, List] = 1,
                      """)
         print("Using own dataset as main dataset for training instead competition dataset.")
     else:
-        dataset.download_datasets(redownload=False)
+        dataset.base_dataset_download(redownload=False)
     
     #dataset.download_extra_datasets()
 

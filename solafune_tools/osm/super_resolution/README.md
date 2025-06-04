@@ -1,18 +1,20 @@
 # Model Training Usage
-This writeup is for model training usage in SWIN2SR by Team N
+This writeup is for model inference and model training of Super Resolution released by Solafune. This Super Resolution x5 model is based on Team N's solution, the first place in competition of (5x Super Resolution Competition)[https://solafune.com/competitions/7a1fc5e3-49bd-4ec1-8378-974951398c98?menu=about&tab=overview]. The model was based on SWIN2SR and developed into 5x super resolution.
 ## Usage
 To run the model inference and training without any constraint, this step must be followed thoroughly
 1. Installing the Requirements
-   - If you use conda as your base environment
+   - If directly from pip or uv
      ```bash
-     conda env create -n superresolution -f environment.yml
-     conda activate superresolution
-     poetry install 
+     pip install solafune-tools
+     pip install solafune-tools[super-resolution]
      ```
-   - If you only use poetry
+     
+   - If directly from the library
      ```bash
-     poetry install
+     pip install .
+     pip install .[super-resolution]
      ```
+
 2. Running the inference modules
    To run the inference through bash/cmd panel interface, please prepare the first image you want the inference first. JPG/JPEG, PNG, TIF, and TIFF are the acceptable file extensions. This bash example will let you run the model inference.
    ```bash
@@ -20,7 +22,8 @@ To run the model inference and training without any constraint, this step must b
    or
    python inference.py --input sample_input/mango.png --output example.jpg # The output will be written in the current directory with the desired name and extension.
    ```
-4. Running the model training
+
+3. Running the model training
    > You can use your dataset or the competition dataset
    > There are extras dataset that is part of the code model training.
    - When you want to use the competition dataset, you don't need to download it first. The program inside the dataset module will automatically download from the S3 bucket storage and put them structurally comply with how the training will be commenced. To train the model you only need to use this bash script:

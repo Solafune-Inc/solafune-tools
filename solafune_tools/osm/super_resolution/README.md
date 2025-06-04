@@ -1,5 +1,5 @@
 # Model Training Usage
-This writeup is for model inference and model training of Super Resolution released by Solafune. This Super Resolution x5 model is based on Team N's solution, the first place in competition of (5x Super Resolution Competition)[https://solafune.com/competitions/7a1fc5e3-49bd-4ec1-8378-974951398c98?menu=about&tab=overview]. The model was based on SWIN2SR and developed into 5x super resolution.
+This write-up is for model inference and model training of Super Resolution released by Solafune. This Super Resolution x5 model is based on Team N's solution, the first place in the competition of [5x Super Resolution Competition](https://solafune.com/competitions/7a1fc5e3-49bd-4ec1-8378-974951398c98?menu=about&tab=overview). The model was based on SWIN2SR and developed into 5x super resolution.
 ## Usage
 To run the model inference and training without any constraint, this step must be followed thoroughly
 1. Installing the Requirements
@@ -30,7 +30,7 @@ To run the model inference and training without any constraint, this step must b
      ```bash
      python train.py
      ```
-   - If you want to test whether the training will run or not, you can use `--debug` flag to find out if something is wrong with your environment without taking time waiting all epochs
+   - If you want to test whether the training will run or not, you can use `--debug` flag to find out if something is wrong with your environment without taking the time to wait for all epochs
      ```bash
      python train.py --debug
      ```
@@ -40,7 +40,7 @@ To run the model inference and training without any constraint, this step must b
      or
      python train.py --use_gpus 4 --strategy ddp # To use 4 GPUs if you have and using the ddp strategy. 
      ```
-   - If you want to use your dataset, please comply with this dataset structure tree. Failed to comply will result in training being aborted
+   - If you want to use your dataset, please comply with the dataset structure tree. Failure to comply will result in training being aborted
      ```tree
        datasets
           ├── test
@@ -51,12 +51,12 @@ To run the model inference and training without any constraint, this step must b
               ├── *_low.tif
               └── ...
      ```
-     After you comply with the dataset structure, you can run this script below to set the True option using your dataset
+     After you comply with the dataset structure, you can run the script below to set the True option using your dataset
      ```bash
      python train.py --own_dataset
      ```
-     Because there are about 4 steps in training the model, it will take around 10-15 days to train all the models depending on how many main datasets or your type of GPUs.
-   - If you want to continue your last training after you have done your first model training, you can use this flag `--continue-training` followed by your models' directory where you keep trained model checkpoint. Please follow this naming format for your mid-training like this folder tree also follow the four-fold arrangement start from number zero to number three.
+     Because there are about 4 steps in training the model, it will take around 10-15 days to train all the models, depending on how many main datasets or your type of GPUs.
+   - If you want to continue your last training after you have done your first model training, you can use this flag `--continue-training` followed by your models' directory where you keep the trained model checkpoint. Please follow this naming format for your mid-training, like this folder tree Also follow the four-fold arrangement starting from number zero to number three.
       ```tree
       working
          ├── trained_model_fold0.ckpt

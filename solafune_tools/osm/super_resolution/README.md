@@ -1,6 +1,6 @@
 # 5x Super Resolution
 ## Model Card Description
-This write-up is for model inference and model training of Super Resolution released by Solafune. This Super Resolution x5 model is based on Team N's solution, the first place in the competition of [5x Super Resolution Competition](https://solafune.com/competitions/7a1fc5e3-49bd-4ec1-8378-974951398c98?menu=about&tab=overview). The model was based on SWIN2SR and developed into 5x super resolution.
+This write-up is for model inference and model training of Super Resolution released by Solafune. This x5 super resolution model is based on Team N's solution, the first place in the competition of [5x Super Resolution Competition](https://solafune.com/competitions/7a1fc5e3-49bd-4ec1-8378-974951398c98?menu=about&tab=overview). The model was based on SWIN2SR and developed into 5x super resolution.
 ## Usage
 To run the model inference and training without any constraint, this step must be followed thoroughly
 1. Installing the Requirements

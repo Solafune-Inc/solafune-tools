@@ -17,6 +17,20 @@ To run the model inference and training without any constraint, this step must b
      ```
 
 2. Running the inference modules
+  ### Module Import
+   To run the inference using python `solafune_tools` library import, you can use this usage tutorial to help you first time using this 5x Super Resolution model inference. Please prepare the first image you want the inference first. JPG/JPEG, PNG, TIF, and TIFF are the acceptable file extensions but basically as long as the format is numpyArray also acceptable. This example lines of code will let you run the model inference.
+  ```python
+  from solafune_tools.osm.super_resolution.inference import Model
+  import tifffile
+  
+  SR_Inference = Model()
+
+  img_array = tifffile.TiffFile(img_input).asarray() # Make sure the input is in RGB bands
+  img_result = SR_Inference.generate(img_array)
+
+  tifffile.imwrite("result.tif", img_result)
+  ```
+  ### Bash/CMD panel Interface
    To run the inference through bash/cmd panel interface, please prepare the first image you want the inference first. JPG/JPEG, PNG, TIF, and TIFF are the acceptable file extensions. This bash example will let you run the model inference.
    ```bash
    python inference.py --input sample_input/mango.png # This will lead to the default output saved in the output/output.tif

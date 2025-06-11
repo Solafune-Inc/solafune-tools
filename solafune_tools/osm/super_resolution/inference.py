@@ -184,6 +184,38 @@ class Model:
         final_output = cv2.resize(final_output, dsize=(650, 650), interpolation = cv2.INTER_CUBIC)
 
         return final_output
+    
+    def generate(self, image: np.ndarray):
+        """
+        Generates a 5x super resolution image from the input image using either single or multi-input inference.
+        Args:
+            image (np.ndarray): The input image as a NumPy array.
+        Returns:
+            np.ndarray or str: The super-resolved image as a NumPy array of type uint8, or an error message string if the input is invalid.
+        Notes:
+            - If the input is not a NumPy array, returns an error message.
+            - If the image dimensions exceed 2000x2000 pixels, returns an error message.
+            - For images with height or width >= 360 pixels, the image is sliced, processed in parts, and then merged.
+            - For smaller images, single input inference is used.
+        """
+        
+        if type(image) != np.ndarray:
+            return "Image is empty or this is not an image as expected"
+        
+        if image.shape[0] > 2000 or image.shape[1] > 2000:
+            return "Image is too large, please enter an image with a maximum size of 2000x2000 pixels"
+        
+        if image.shape[0] >= 360 or image.shape[1] >= 360:
+            print("slice")
+            img_list, indices = slice_img(image)
+            img_results = self.multi_input_inference([resize_img(x) for x in img_list])
+            new_indices: List[Tuple[int, int, int, int]] = [(idx[0] * 5, idx[1] * 5, idx[2] * 5, idx[3] * 5) for idx in indices] # idx is Tuple[int, int, int, int]
+            img_result = merge_img(img_results, new_indices).astype(np.uint8)
+            
+        else:
+            img_result = self.single_input_inference(resize_img(image))
+
+        return img_result.astype(np.uint8)
 
 if __name__ == "__main__":
     start_time = time.time()
@@ -202,21 +234,10 @@ if __name__ == "__main__":
 
     swin2sr_teamN_infer = Model()
 
-    if type(img_input) != np.ndarray:
-        raise SystemExit("Image is empty or this is not an image as expected")
-    
-    if img_input.shape[0] > 2000 or img_input.shape[1] > 2000:
-        raise SystemExit("Image is too large, please enter an image with a maximum size of 2000x2000 pixels")
-    
-    if img_input.shape[0] >= 360 or img_input.shape[1] >= 360:
-        print("slice")
-        img_list, indices = slice_img(img_input)
-        img_results = swin2sr_teamN_infer.multi_input_inference([resize_img(x) for x in img_list])
-        new_indices: List[Tuple[int, int, int, int]] = [(idx[0] * 5, idx[1] * 5, idx[2] * 5, idx[3] * 5) for idx in indices] # idx is Tuple[int, int, int, int]
-        img_result = merge_img(img_results, new_indices).astype(np.uint8)
-        
-    else:
-        img_result = swin2sr_teamN_infer.single_input_inference(resize_img(img_input))
+    img_result = swin2sr_teamN_infer.generate(img_input)
+    if isinstance(img_result, str):
+        print(img_result)
+        exit(1)
 
     if img_output == "output/output.tif":
         os.makedirs(img_output.split("/")[0], exist_ok=True)

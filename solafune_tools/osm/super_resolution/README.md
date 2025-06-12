@@ -3,7 +3,7 @@
 This write-up is for model inference and model training of Super Resolution released by Solafune. This x5 super resolution model is based on Team N's solution, the first place in the competition of [5x Super Resolution Competition](https://solafune.com/competitions/7a1fc5e3-49bd-4ec1-8378-974951398c98?menu=about&tab=overview). The model was based on SWIN2SR and developed into 5x super resolution.
 ## Usage
 To run the model inference and training without any constraint, this step must be followed thoroughly
-1. Installing the Requirements
+### Installing the Requirements
    - If directly from pip or uv
      ```bash
      pip install solafune-tools
@@ -16,8 +16,8 @@ To run the model inference and training without any constraint, this step must b
      pip install .[super-resolution]
      ```
 
-2. Running the inference modules
-  ### Module Import
+### Running the inference modules
+  #### Module Import
    To run the inference using python `solafune_tools` library import, you can use this usage tutorial to help you first time using this 5x Super Resolution model inference. Please prepare the first image you want the inference first. JPG/JPEG, PNG, TIF, and TIFF are the acceptable file extensions but basically as long as the format is numpyArray also acceptable. This example lines of code will let you run the model inference.
   ```python
   from solafune_tools.osm.super_resolution.inference import Model
@@ -30,7 +30,7 @@ To run the model inference and training without any constraint, this step must b
 
   tifffile.imwrite("result.tif", img_result)
   ```
-  ### Bash/CMD panel Interface
+  #### Bash/CMD panel Interface
    To run the inference through bash/cmd panel interface, please prepare the first image you want the inference first. JPG/JPEG, PNG, TIF, and TIFF are the acceptable file extensions. This bash example will let you run the model inference.
    ```bash
    python inference.py --input sample_input/mango.png # This will lead to the default output saved in the output/output.tif
@@ -38,7 +38,7 @@ To run the model inference and training without any constraint, this step must b
    python inference.py --input sample_input/mango.png --output example.jpg # The output will be written in the current directory with the desired name and extension.
    ```
 
-3. Running the model training
+### Running the model training
    > You can use your dataset or the competition dataset
    > There are extras dataset that is part of the code model training.
    - When you want to use the competition dataset, you don't need to download it first. The program inside the dataset module will automatically download from the S3 bucket storage and put them structurally comply with how the training will be commenced. To train the model you only need to use this bash script:

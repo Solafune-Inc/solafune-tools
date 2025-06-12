@@ -25,7 +25,7 @@ To run the model inference and training without any constraint, this step must b
   
   SR_Inference = Model()
 
-  img_array = tifffile.TiffFile(img_input).asarray() # Make sure the input is in RGB bands
+  img_array = tifffile.TiffFile("test.tif").asarray() # Make sure the input is in RGB bands, if you are using cv2, you might want to convert it first to RGB from BGR
   img_result = SR_Inference.generate(img_array)
 
   tifffile.imwrite("result.tif", img_result)

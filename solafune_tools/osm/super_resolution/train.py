@@ -1,8 +1,9 @@
-from train_step1 import train as train_step1
-from train_step2 import train as train_step2
-from train_step3 import train as train_step3
-from train_step4 import train as train_step4
-from train_continue import train as train_continue
+from train_src.train_step1 import train as train_step1
+from train_src.train_step2 import train as train_step2
+from train_src.train_step3 import train as train_step3
+from train_src.train_step4 import train as train_step4
+from train_src.train_continue import train as train_continue
+from train_src.train_end import move_weights
 import torch
 import traceback
 import argparse
@@ -66,6 +67,7 @@ def main(gpus: Union[List, int], strategy: Union[bool, str] = False, using_own_d
     torch.cuda.empty_cache()
     train_step4(using_own_dataset=using_own_dataset, gpus=gpus, debug = debug, strategy = strategy)
     torch.cuda.empty_cache()
+    move_weights()
 
 
 

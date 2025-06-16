@@ -33,9 +33,9 @@ To run the model inference and training without any constraint, this step must b
   #### Bash/CMD panel Interface
    To run the inference through bash/cmd panel interface, please prepare the first image you want the inference first. JPG/JPEG, PNG, TIF, and TIFF are the acceptable file extensions. This bash example will let you run the model inference.
    ```bash
-   python inference.py --input sample_input/mango.png # This will lead to the default output saved in the output/output.tif
+   python inference.py --input sample_input/large.png # This will lead to the default output saved in the output/output.tif
    or
-   python inference.py --input sample_input/mango.png --output example.jpg # The output will be written in the current directory with the desired name and extension.
+   python inference.py --input sample_input/small.tif --output example.jpg # The output will be written in the current directory with the desired name and extension.
    ```
 
 ### Running the model training

@@ -3,14 +3,14 @@ from box import Box
 from typing import List, Tuple
 
 try:
-    from solafune_tools.osm.super_resolution.config import CFG
-    from solafune_tools.osm.super_resolution.model import SRModel
-    from solafune_tools.osm.super_resolution.common_utils import slice_img, merge_img, resize_img
-except:
     print("Running from solution modules")
     from config import CFG
     from model import SRModel
-    from common_utils import slice_img, merge_img, resize_img
+    from common_utils import slice_img, merge_img, resize_img, OSMResourceDownloader
+except:
+    from solafune_tools.osm.super_resolution.config import CFG
+    from solafune_tools.osm.super_resolution.model import SRModel
+    from solafune_tools.osm.super_resolution.common_utils import slice_img, merge_img, resize_img, OSMResourceDownloader
 
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -85,18 +85,34 @@ class Model:
         """
         self.transform = A.Compose([ToTensorV2()], is_check_shapes=False)
         self.processor = AutoImageProcessor.from_pretrained(cfg.model_name)
-        try: 
-            models_dir = os.path.join(os.getcwd(), "osm/super_resolution/weights")
-            self.list_model = []
-            for fold in range(cfg.folds):
-                model = SRModel.load_from_checkpoint(os.path.join(models_dir, (cfg.ckpt_stem + f"_fold{fold}.ckpt")), cfg=cfg, fold=fold)
-                self.list_model.append(model.to(cfg.device))
+        try:
+            # Use trained models from recent training
+            try:
+                models_dir = os.path.join(os.getcwd(), "osm/super_resolution/weights")
+                self.list_model = []
+                for fold in range(cfg.folds):
+                    model = SRModel.load_from_checkpoint(os.path.join(models_dir, (cfg.ckpt_stem + f"_fold{fold}.ckpt")), cfg=cfg, fold=fold)
+                    self.list_model.append(model.to(cfg.device))
+            except:
+                models_dir = os.path.join(os.getcwd(), "weights")
+                self.list_model = []
+                for fold in range(cfg.folds):
+                    model = SRModel.load_from_checkpoint(os.path.join(models_dir, (cfg.ckpt_stem + f"_fold{fold}.ckpt")), cfg=cfg, fold=fold)
+                    self.list_model.append(model.to(cfg.device))
         except:
-            models_dir = os.path.join(os.getcwd(), "weights")
+            # If the models are not found, download them from the OSM resource downloader
+            print("Models not found, downloading from OSM resource downloader")
+            downloader = OSMResourceDownloader()
+            models_dir = downloader.model_weights_dir
+            models_dir = os.path.join(models_dir, "super_resolution")
+
+            # Download the model weights
+            downloader.model_weight_download("super_resolution")
             self.list_model = []
             for fold in range(cfg.folds):
                 model = SRModel.load_from_checkpoint(os.path.join(models_dir, (cfg.ckpt_stem + f"_fold{fold}.ckpt")), cfg=cfg, fold=fold)
                 self.list_model.append(model.to(cfg.device))
+        
     
     def merge_output(self, output_list):
         """

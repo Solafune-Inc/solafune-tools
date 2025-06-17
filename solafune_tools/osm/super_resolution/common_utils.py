@@ -46,6 +46,63 @@ class OSMResourceDownloader:
         self.chunk_size = 1024
         os.makedirs(self.datasets_dir, exist_ok=True)
 
+        self.model_name = {
+            "super_resolution": "https://solafune-osm.s3.ap-northeast-1.amazonaws.com/x5-super-resolution/v1/trained_model.zip"
+        }
+        user_dir = os.path.expanduser(os.path.join("~", "temp"))
+        self.model_weights_dir = os.path.join(user_dir, "weights")
+        os.makedirs(self.model_weights_dir, exist_ok=True)
+
+    def model_weight_download(self, model_name: str, redownload=False) -> Union[str, Tuple[str, str]]:
+        """
+        Download model weights from a specified URL and save them to a local directory.
+
+        Parameters:
+            - model_name (str): The name of the model for which weights are to be downloaded.
+
+        Returns:
+            - str: A message indicating the status of the download.
+            - Tuple[str, str]: A tuple containing the status message and the path to the downloaded model weights file.
+        
+        Raises:
+            - ValueError: If the specified model name is not found in the predefined model names.
+        """
+        if model_name not in self.model_name:
+            raise ValueError(f"Model {model_name} not found. Available models: {list(self.model_name.keys())}")
+
+        weights_dir = os.path.join(self.model_weights_dir, model_name)
+        os.makedirs(weights_dir, exist_ok=True)
+        url = self.model_name[model_name]
+        filename = os.path.join(self.model_weights_dir, url.split("/")[-1])
+
+        if os.path.exists(filename):
+            if not redownload:
+                return "Model weights already exist, redownload disabled", filename
+            else:
+                os.remove(filename)
+        response = requests.get(url, stream=True)
+        if response.status_code != 200:
+            return "Error downloading, contact the author of the Solafute-Tools", filename
+        # Save the downloaded file locally
+        with open(filename, 'wb') as f:
+            pbar = tqdm(desc=f"Downloading model weights...{filename}", unit="B", total=int(response.headers['Content-Length']))
+            for chunk in response.iter_content(chunk_size=self.chunk_size): 
+                if chunk: # filter out keep-alive new chunks
+                    pbar.update(len(chunk))
+                    f.write(chunk)
+            pbar.close()
+            f.close()
+        # Unzip the downloaded file
+        with zipfile.ZipFile(filename, 'r') as zip_file:
+            pbar = tqdm(desc=f"Unzipping file...{filename}", iterable=zip_file.namelist(), total=len(zip_file.namelist()))
+            for file in pbar:
+                zip_file.extract(member=file, path=weights_dir)
+            pbar.close()
+            zip_file.close()
+        
+        return f"Model weights downloaded and unzipped to folder {weights_dir}", filename
+        
+
     def base_dataset_download(self, redownload:bool = False) -> Tuple[str, List[str]]:
         """
         Download and unzip datasets.

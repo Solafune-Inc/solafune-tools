@@ -23,6 +23,7 @@ import argparse
 import tifffile
 import time
 from tqdm import tqdm
+from typing import Union
 
 # Config
 
@@ -201,7 +202,7 @@ class Model:
 
         return final_output
     
-    def generate(self, image: np.ndarray):
+    def generate(self, image: np.ndarray) -> Union[str, np.ndarray]:
         """
         Generates a 5x super resolution image from the input image using either single or multi-input inference.
         Args:

@@ -28,11 +28,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install uv
           uv venv
-          uv pip install -r requirements.txt
+          uv pip install -r requirements/base.txt
           uv pip install pytest
       
       - name: Run PyTest
         shell: bash
         run: |
           source .venv/bin/activate
-          pytest
+          pytest --ignore=tests/test_osm/

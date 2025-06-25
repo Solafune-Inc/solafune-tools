@@ -46,8 +46,8 @@ class OSMResourceDownloader:
         self.chunk_size = 1024
         os.makedirs(self.datasets_dir, exist_ok=True)
 
-        self.model_name = {
-            "super_resolution": "https://solafune-osm.s3.ap-northeast-1.amazonaws.com/x5-super-resolution/v1/trained_model.zip"
+        self.model_url = {
+            "super_resolution": "https://ywbul658zi.execute-api.us-west-2.amazonaws.com/dev/download/5x_super_resolution"
         }
         user_dir = os.path.expanduser(os.path.join("~", "temp"))
         self.model_weights_dir = os.path.join(user_dir, "weights")
@@ -67,13 +67,13 @@ class OSMResourceDownloader:
         Raises:
             - ValueError: If the specified model name is not found in the predefined model names.
         """
-        if model_name not in self.model_name:
-            raise ValueError(f"Model {model_name} not found. Available models: {list(self.model_name.keys())}")
+        if model_name not in self.model_url:
+            raise ValueError(f"Model {model_name} not found. Available models: {list(self.model_url.keys())}")
 
         weights_dir = os.path.join(self.model_weights_dir, model_name)
         os.makedirs(weights_dir, exist_ok=True)
-        url = self.model_name[model_name]
-        filename = os.path.join(self.model_weights_dir, url.split("/")[-1])
+        url = self.model_url[model_name]
+        filename = os.path.join(self.model_weights_dir, url.split("/")[-1])+ ".zip"
 
         if os.path.exists(filename):
             if not redownload:
@@ -81,8 +81,10 @@ class OSMResourceDownloader:
             else:
                 os.remove(filename)
         response = requests.get(url, stream=True)
+
         if response.status_code != 200:
             return "Error downloading, contact the author of the Solafute-Tools", filename
+        
         # Save the downloaded file locally
         with open(filename, 'wb') as f:
             pbar = tqdm(desc=f"Downloading model weights...{filename}", unit="B", total=int(response.headers['Content-Length']))

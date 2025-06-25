@@ -3,11 +3,13 @@ from box import Box
 from typing import List, Tuple
 
 try:
-    print("Running from solution modules")
     from config import CFG
     from model import SRModel
     from common_utils import slice_img, merge_img, resize_img, OSMResourceDownloader
-except:
+    print("Running from internal modules")
+except ImportError as e:
+    print(f"ImportError: {e}. Trying to import from solafune_tools modules.")
+    print("Running from solafune_tools modules")
     from solafune_tools.osm.super_resolution.config import CFG
     from solafune_tools.osm.super_resolution.model import SRModel
     from solafune_tools.osm.super_resolution.common_utils import slice_img, merge_img, resize_img, OSMResourceDownloader
@@ -22,7 +24,8 @@ import cv2
 import argparse
 import tifffile
 import time
-from tqdm import tqdm
+from tqdm.auto import tqdm
+import tqdm as std_tqdm
 from typing import Union
 
 # Config
@@ -74,64 +77,86 @@ class TeamNInferenceDataset(Dataset):
         return image
 
 class Model:
+    MAX_INPUT_DIM = 2000
+    SLICE_THRESHOLD = 360
+    FINAL_SIZE = (650, 650)
+    UPSCALE_FACTOR = 5
+
     def __init__(self) -> None:
         """
-        Initializes an instance of the class consisting models want to use.
-
-        Parameters:
-            None.
-
-        Returns:
-            None.
+        Initializes the instance, loading models from local paths or downloading them if not found.
         """
         self.transform = A.Compose([ToTensorV2()], is_check_shapes=False)
         self.processor = AutoImageProcessor.from_pretrained(cfg.model_name)
-        try:
-            # Use trained models from recent training
-            try:
-                models_dir = os.path.join(os.getcwd(), "osm/super_resolution/weights")
-                self.list_model = []
-                for fold in range(cfg.folds):
-                    model = SRModel.load_from_checkpoint(os.path.join(models_dir, (cfg.ckpt_stem + f"_fold{fold}.ckpt")), cfg=cfg, fold=fold)
-                    self.list_model.append(model.to(cfg.device))
-            except:
-                models_dir = os.path.join(os.getcwd(), "weights")
-                self.list_model = []
-                for fold in range(cfg.folds):
-                    model = SRModel.load_from_checkpoint(os.path.join(models_dir, (cfg.ckpt_stem + f"_fold{fold}.ckpt")), cfg=cfg, fold=fold)
-                    self.list_model.append(model.to(cfg.device))
-        except:
-            # If the models are not found, download them from the OSM resource downloader
-            print("Models not found, downloading from OSM resource downloader")
-            downloader = OSMResourceDownloader()
-            models_dir = downloader.model_weights_dir
-            models_dir = os.path.join(models_dir, "super_resolution")
+        self.list_model = self._load_models()
 
-            # Download the model weights
-            downloader.model_weight_download("super_resolution")
-            self.list_model = []
-            for fold in range(cfg.folds):
-                model = SRModel.load_from_checkpoint(os.path.join(models_dir, (cfg.ckpt_stem + f"_fold{fold}.ckpt")), cfg=cfg, fold=fold)
-                self.list_model.append(model.to(cfg.device))
+    def _load_models_from_path(self, models_dir: str) -> List[SRModel]:
+        """Helper function to load all model folds from a specific directory."""
+        models = []
+        for fold in range(cfg.folds):
+            ckpt_path = os.path.join(models_dir, cfg.ckpt_stem + f"_fold{fold}.ckpt")
+            if not os.path.exists(ckpt_path):
+                # If any fold is missing, this path is invalid.
+                return [] 
+            model = SRModel.load_from_checkpoint(ckpt_path, cfg=cfg, fold=fold)
+            models.append(model.to(cfg.device))
+        return models
+
+    def _load_models(self) -> List[SRModel]:
+        """
+        Tries to load models from a series of potential local directories.
+        If all attempts fail, it downloads the models and then loads them.
+        """
+        # Define potential local directories in order of preference
+        potential_dirs = [
+            os.path.join(os.getcwd(), "osm/super_resolution/weights"),
+            os.path.join(os.getcwd(), "weights"),
+        ]
+
+        for models_dir in potential_dirs:
+            print(f"Attempting to load models from: {models_dir}")
+            loaded_models = self._load_models_from_path(models_dir)
+            if loaded_models:
+                print("Models loaded successfully.")
+                return loaded_models
+
+        # If models were not found in any local path, download them
+        print("Local models not found. Downloading from OSM resource downloader...")
+        downloader = OSMResourceDownloader()
+        status, _ = downloader.model_weight_download("super_resolution") # Returns status, but we assume success if it doesn't raise an error
+        print(f"Download status: {status}")
+
+        models_dir = os.path.join(downloader.model_weights_dir, "super_resolution")
+        print(f"Attempting to load downloaded models from: {models_dir}")
+        downloaded_models = self._load_models_from_path(models_dir)
+        
+        if not downloaded_models:
+            # This would be a critical failure
+            raise RuntimeError("Failed to load models even after downloading. Please check paths and files.")
+            
+        print("Downloaded models loaded successfully.")
+        return downloaded_models
         
     
-    def merge_output(self, output_list):
+    def merge_output(self, grouped_outputs: List[Tuple[np.ndarray, ...]]) -> List[np.ndarray]:
         """
-        Merge the given list of outputs into a single output array.
+        Averages the predictions from multiple models for each image.
         
         Parameters:
-            output_list (list): A list of output arrays to be merged.
+            grouped_outputs (List[Tuple[np.ndarray, ...]]): A list where each element is a tuple 
+                                                            of prediction arrays from all models for one input image.
         
         Returns:
-            np.ndarray: The merged output array.
+            List[np.ndarray]: A list of final, merged images.
         """
-        if not isinstance(output_list[0], np.ndarray):
-            final_output = [np.round(np.mean(np.array(image), axis=0), decimals=0).astype(np.uint8) for image in output_list]
-        else:
-            output_list = np.array(output_list)
-            output_list = np.mean(output_list, axis=0)
-            final_output = np.round(output_list, decimals=0).astype(np.uint8)
-        return final_output
+        final_images = []
+        for image_preds in grouped_outputs:
+            # Stack predictions along a new axis and calculate the mean
+            mean_pred = np.mean(np.array(image_preds), axis=0)
+            # Round and convert to the final data type
+            final_image = np.round(mean_pred, decimals=0).astype(np.uint8)
+            final_images.append(final_image)
+        return final_images
     
     @torch.inference_mode()
     def main_inference_core(self, model, images):
@@ -158,21 +183,43 @@ class Model:
         
         output_list = []
         show_progress = getattr(cfg, "show_progress", True)
-        data_iter = tqdm(self.list_model, desc="Models", disable=not show_progress)
-        for model in data_iter:
-            batch_iter = tqdm(inference_dl, desc="Batches", leave=False, disable=not show_progress)
-            output = [self.main_inference_core(model, batch_images.to(cfg.device)) for batch_images in batch_iter]
-            output_list.append([image for batches_output in output for image in batches_output])
-        
-        images = []
-        for i, output in enumerate(output_list):
-            for j, image in enumerate(output):
-                if i == 0:
-                    images.append([image]) # type: ignore # Initialize the list of images with the first model's output
-                else:
-                    images[j].append(image) # type: ignore # Append the output of the subsequent models to the corresponding image
 
-        final_output = self.merge_output(images)
+        # --- Conditional Logic for Progress Bar Arguments ---
+        # Check if we are in a terminal environment by checking the type of tqdm.
+        # tqdm.auto will select std_tqdm.tqdm for terminals.
+        is_terminal = isinstance(tqdm, std_tqdm.tqdm)
+
+        # Set arguments for the outer loop (models)
+        outer_kwargs = {'desc': "Overall Model Progress", 'disable': not show_progress}
+        if is_terminal:
+            outer_kwargs['position'] = 0
+            outer_kwargs['leave'] = True
+
+        # Set arguments for the inner loop (batches)
+        inner_kwargs = {'desc': "Batches", 'disable': not show_progress, 'leave': False}
+        if is_terminal:
+            inner_kwargs['position'] = 1
+        # ----------------------------------------------------
+
+        # The loops now use the dynamically set keyword arguments
+        for model in tqdm(self.list_model, **outer_kwargs):
+            
+            batch_iter = tqdm(inference_dl, **inner_kwargs)
+            
+            model_outputs = []
+            for batch_images in batch_iter:
+                output = self.main_inference_core(model, batch_images.to(cfg.device))
+                model_outputs.extend(output)
+                
+            output_list.append(model_outputs)
+        
+        # output_list is like [[model1_img1, model1_img2], [model2_img1, model2_img2], ...]
+        # We want to group them as [[model1_img1, model2_img1], [model1_img2, model2_img2], ...]
+        # The * operator unpacks the list for zip
+        images_grouped_by_input = list(zip(*output_list))
+
+        # Now, pass this clean structure to the merge function
+        final_output = self.merge_output(images_grouped_by_input)
         final_output = [cv2.resize(image, dsize=(650, 650), interpolation = cv2.INTER_CUBIC) for image in final_output]
 
         return final_output
@@ -219,14 +266,19 @@ class Model:
         if type(image) != np.ndarray:
             return "Image is empty or this is not an image as expected"
         
-        if image.shape[0] > 2000 or image.shape[1] > 2000:
-            return "Image is too large, please enter an image with a maximum size of 2000x2000 pixels"
+        if image.shape[0] > self.MAX_INPUT_DIM or image.shape[1] > self.MAX_INPUT_DIM:
+            return f"Image is too large, please use an image up to {self.MAX_INPUT_DIM}x{self.MAX_INPUT_DIM} pixels"
         
-        if image.shape[0] >= 360 or image.shape[1] >= 360:
+        if image.shape[0] >= self.SLICE_THRESHOLD or image.shape[1] >= self.SLICE_THRESHOLD:
             print("slice")
             img_list, indices = slice_img(image)
             img_results = self.multi_input_inference([resize_img(x) for x in img_list])
-            new_indices: List[Tuple[int, int, int, int]] = [(idx[0] * 5, idx[1] * 5, idx[2] * 5, idx[3] * 5) for idx in indices] # idx is Tuple[int, int, int, int]
+            new_indices: List[Tuple[int, int, int, int]] = [(
+                idx[0] * self.UPSCALE_FACTOR, 
+                idx[1] * self.UPSCALE_FACTOR, 
+                idx[2] * self.UPSCALE_FACTOR, 
+                idx[3] * self.UPSCALE_FACTOR
+            ) for idx in indices] # idx is Tuple[int, int, int, int]
             img_result = merge_img(img_results, new_indices).astype(np.uint8)
             
         else:
@@ -243,6 +295,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     img_input = str(args.input)
     img_output = str(args.output)
+
+    output_dir = os.path.dirname(img_output)
+    # Ensure the output directory exists, but only if a directory path is specified
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
 
     if img_input.endswith(".tif") or img_input.endswith(".tiff"):
         img_input = tifffile.TiffFile(img_input).asarray() # Make sure the input is in RGB bands

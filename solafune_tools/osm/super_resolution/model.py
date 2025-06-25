@@ -255,6 +255,7 @@ class SRModel(LightningModule):
         self.cfg = cfg
         self.__build_model()
         self.score_max = 0.0
+        self.CROP_SIZE = 520
         self.fold = fold  # 何fold目のモデルか？
         self.remained_time_estimator = RemainedTimeEstimator()
 

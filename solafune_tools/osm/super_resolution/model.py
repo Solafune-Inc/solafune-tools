@@ -293,8 +293,8 @@ class SRModel(LightningModule):
         - This function is the forward pass of the model.
         """
         f = self.backbone(x)["reconstruction"]  # type: ignore
-        f = f[:, :, 0:520, 0:520]
-        # assert f.shape == (x.shape[0], 3, 520, 520)
+        f = f[:, :, 0:self.CROP_SIZE, 0:self.CROP_SIZE]
+        # assert f.shape == (x.shape[0], 3, self.CROP_SIZE, self.CROP_SIZE)
         f = TF.resize(f, size=650, interpolation=T.InterpolationMode.BICUBIC) # type: ignore
         f = torch.clamp(f, min=0.0, max=1.0)
         f = f * 255

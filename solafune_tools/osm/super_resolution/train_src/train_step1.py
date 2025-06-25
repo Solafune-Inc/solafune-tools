@@ -73,9 +73,9 @@ def train(using_own_dataset : bool = False, gpus: Union[int, str, List] = 1, deb
         dataset_folder_check = is_dataset_folder_exist()
         if not dataset_folder_check:
             sys.exit("""
-                     Exiting the training Script!
-                     It seems you are not following the project tree structure for the dataset or perhaps you have not prepare the dataset structure correctly
-                     Please prepare your dataset stucture correctly like this bellow:
+                     Exiting the training script!
+                     It seems you are not following the project tree structure for the dataset, or perhaps you have not set up the dataset structure correctly.
+                     Please set up your dataset structure correctly as shown below:
                         datasets
                             ├── test
                             │   ├── *_low.tif 

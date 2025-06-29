@@ -5,7 +5,7 @@ import pandas as pd
 import tifffile
 from natsort import natsorted
 import numpy as np
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import shutil
 import copy
 from box import Box

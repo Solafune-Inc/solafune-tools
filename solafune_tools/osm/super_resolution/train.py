@@ -63,7 +63,7 @@ def main(gpus: Union[List, int], strategy: Union[bool, str] = False, using_own_d
     torch.cuda.empty_cache()
     train_step2(using_own_dataset=using_own_dataset, gpus=gpus, debug = debug, strategy = strategy)
     torch.cuda.empty_cache()
-    train_step3(using_own_dataset=using_own_dataset, gpus=gpus, strategy = strategy)
+    train_step3(using_own_dataset=using_own_dataset, gpus=gpus, debug = debug, strategy = strategy)
     torch.cuda.empty_cache()
     train_step4(using_own_dataset=using_own_dataset, gpus=gpus, debug = debug, strategy = strategy)
     torch.cuda.empty_cache()

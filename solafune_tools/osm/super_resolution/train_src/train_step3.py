@@ -59,7 +59,7 @@ def is_dataset_folder_exist():
         return True
     else: return False
 
-def train(using_own_dataset : bool = False, gpus: Union[int, str, List] = 1, debug: bool = True, strategy: Union[str, bool] = False):
+def train(using_own_dataset : bool = False, gpus: Union[int, str, List] = 1, debug: bool = False, strategy: Union[str, bool] = False):
     """
     Trains a model using the given dataset.
 

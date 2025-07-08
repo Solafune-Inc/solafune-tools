@@ -56,19 +56,25 @@ class CFG(object):
             elif gpus > 1: # type: ignore
                 gpus = 1
 
+        if gpus:
+            accelerator = "gpu"
+            devices = gpus if isinstance(gpus, int) else len(gpus)
+
+        else:
+            accelerator = "cpu"
+            devices = 1
+
         if strategy:
             self.trainer: dict[str, Any] = {
-                "gpus": gpus,
+                "accelerator": accelerator,
+                "devices" : devices,
                 "accumulate_grad_batches": 1,  # 勾配累積 #経験上増やして良くなった試しはない(基本的に悪化する。生バッチ増やしたほうがいい)
                 "fast_dev_run": False,  # Trueでデバッグ用モード。1epochで終了
                 "num_sanity_val_steps": 0,  # デバッグ関係の引数
-                "resume_from_checkpoint": None,
                 # "log_every_n_steps": 5,  # 何stepごとにログを吐き出すか # pytorch lightning における self.logでの操作が難しい
                 "check_val_every_n_epoch": 1,  # 何epochごとにvalを行うか
                 "val_check_interval": 1.0,
                 # "precision": 16,  # 16bitで計算
-                "accelerator": "gpu",
-                "devices": len(gpus), # type: ignore
                 # "gradient_clip_val": 25.0, # automatic_optimization=Trueのときに有効
                 # "gradient_clip_algorithm": "value", # automatic_optimization=Trueのときに有効
                 "enable_progress_bar": False,  # wandbのログが死ぬので切る
@@ -77,11 +83,11 @@ class CFG(object):
             }
         else:
             self.trainer: dict[str, Any] = {
-                "gpus": gpus,
+                "accelerator": accelerator,
+                "devices" : devices,
                 "accumulate_grad_batches": 1,  # 勾配累積 #経験上増やして良くなった試しはない(基本的に悪化する。生バッチ増やしたほうがいい)
                 "fast_dev_run": False,  # Trueでデバッグ用モード。1epochで終了
                 "num_sanity_val_steps": 0,  # デバッグ関係の引数
-                "resume_from_checkpoint": None,
                 # "log_every_n_steps": 5,  # 何stepごとにログを吐き出すか # pytorch lightning における self.logでの操作が難しい
                 "check_val_every_n_epoch": 1,  # 何epochごとにvalを行うか
                 "val_check_interval": 1.0,

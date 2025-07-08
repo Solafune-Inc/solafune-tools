@@ -98,7 +98,7 @@ class Model:
             if not os.path.exists(ckpt_path):
                 # If any fold is missing, this path is invalid.
                 return [] 
-            model = SRModel.load_from_checkpoint(ckpt_path, cfg=cfg, fold=fold)
+            model = SRModel.load_from_checkpoint(ckpt_path, cfg=cfg, fold=fold, weights_only=False)
             models.append(model.to(cfg.device))
         return models
 

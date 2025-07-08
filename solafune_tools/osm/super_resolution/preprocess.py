@@ -15,7 +15,7 @@ import torch
 from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 from pytorch_lightning import LightningDataModule
-from pytorch_lightning.utilities.seed import seed_everything
+from lightning_fabric.utilities.seed import seed_everything
 from transformers import AutoImageProcessor
 
 

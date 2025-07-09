@@ -1,13 +1,15 @@
-from train_src.train_step1 import train as train_step1
+"""from train_src.train_step1 import train as train_step1
 from train_src.train_step2 import train as train_step2
 from train_src.train_step3 import train as train_step3
 from train_src.train_step4 import train as train_step4
-from train_src.train_continue import train as train_continue
+from train_src.train_continue import train as train_continue"""
 from train_src.train_end import move_weights
 import torch
 import traceback
 import argparse
 from typing import Union, List, Tuple
+import os
+import sys
 
 def validate_gpus_argument(argument:str) -> Union[List, int]:
     try:
@@ -55,7 +57,7 @@ def main(gpus: Union[List, int], strategy: Union[bool, str] = False, using_own_d
     """
     mid_training, models_dir = continue_training
 
-    if mid_training:
+    """if mid_training:
         train_continue(using_own_dataset=using_own_dataset, gpus=gpus, debug = debug, strategy = strategy, models_dir=models_dir)
         exit()
 
@@ -63,10 +65,33 @@ def main(gpus: Union[List, int], strategy: Union[bool, str] = False, using_own_d
     torch.cuda.empty_cache()
     train_step2(using_own_dataset=using_own_dataset, gpus=gpus, debug = debug, strategy = strategy)
     torch.cuda.empty_cache()
-    train_step3(using_own_dataset=using_own_dataset, gpus=gpus, debug = debug, strategy = strategy)
+    train_step3(using_own_dataset=using_own_dataset, gpus=gpus, strategy = strategy)
     torch.cuda.empty_cache()
     train_step4(using_own_dataset=using_own_dataset, gpus=gpus, debug = debug, strategy = strategy)
     torch.cuda.empty_cache()
+    move_weights()"""
+
+    # Alternative using shell script
+    args = f"--use_gpus {gpus} --strategy {strategy} {'--debug' if debug else ''} {'--own_dataset' if using_own_dataset else ''}"
+    if mid_training:
+        args += f" --continue-training {models_dir}"
+        os.system(f"python train_src/train_continue.py {args}")
+
+    else:
+        print(f"Argurments for training: {args}")
+        print("-- Starting training step 1 --")
+        os.system(f"python -m train_src.train_step1 {args}")
+        torch.cuda.empty_cache()
+        print("-- Starting training step 2 --")
+        os.system(f"python -m train_src.train_step2 {args}")
+        torch.cuda.empty_cache()
+        print("-- Starting training step 3 --")
+        os.system(f"python -m train_src.train_step3 {args}")
+        torch.cuda.empty_cache()
+        print("-- Starting training step 4 --")
+        os.system(f"python -m train_src.train_step4 {args}")
+        torch.cuda.empty_cache()
+    print("-- Moving weights --")
     move_weights()
 
 
@@ -79,6 +104,6 @@ if __name__ == "__main__":
     parser.add_argument("--continue-training", type=str, default="False")
     parser.add_argument("--debug", action="store_true", default=False)
     args = parser.parse_args()
-    main(using_own_dataset=args.own_dataset, gpus=validate_gpus_argument(args.use_gpus), 
-         strategy=validate_strategy_argument(args.strategy), continue_training=validate_continue_training(args.continue_training), 
+    main(using_own_dataset=args.own_dataset, gpus=args.use_gpus, 
+         strategy=args.strategy, continue_training=validate_continue_training(args.continue_training), 
          debug = args.debug)

@@ -50,7 +50,7 @@ warnings.filterwarnings("ignore")
 torch.autograd.set_detect_anomaly(False) # type: ignore
 torch.backends.cudnn.benchmark = True
 
-import os, sys
+import os, sys, argparse, traceback
 
 def is_dataset_folder_exist():
     train_dir_exist, test_dir_exist  = os.path.isdir("datasets/train"), os.path.isdir("datasets/test")
@@ -275,6 +275,41 @@ def train(using_own_dataset : bool = False, gpus: Union[int, str, List] = 1, deb
 
     #merge_inference(cfg.outdir)
 
+def validate_gpus_argument(argument:str) -> Union[List, int]:
+    try:
+        if "," in argument:
+            argument = [int(x) for x in argument.split(",")] # type: ignore # Convert to list of integers
+        else:
+            argument = int(argument) # type: ignore # Convert to single integer
+    except:
+        traceback.print_exc()
+
+    return argument # type: ignore
+
+def validate_strategy_argument(argument:str) -> Union[str, bool]:
+    if argument.lower() == "false":
+        argument = False # type: ignore # Convert to boolean False
+    elif argument.lower() == "ddp":
+        argument = "ddp"
+    else:
+        raise ValueError('Training strategy not defined correctly, choose between "ddp" or False')
+
+    return argument
 
 if __name__ == "__main__":
-    train()
+    parser = argparse.ArgumentParser(description="Train a model using the given dataset.")
+    parser.add_argument("--own_dataset", type=bool, default=False, help="Use own dataset instead of competition dataset.")
+    parser.add_argument("--use_gpus", type=str, default="1", help="Number of GPUs to use for training. Can be a comma-separated list of GPU IDs or a single integer.")
+    parser.add_argument("--debug", action="store_true", default=False, help="Enable debug mode for training.")
+    parser.add_argument("--strategy", type=str, default=False, help='Training strategy, choose between "ddp" or False.')
+    
+    args = parser.parse_args()
+    using_own_dataset = args.own_dataset
+    gpus = validate_gpus_argument(args.use_gpus)
+    debug = args.debug
+    strategy = validate_strategy_argument(args.strategy)
+
+    if isinstance(gpus, int):
+        gpus = [gpus]
+
+    train(using_own_dataset=using_own_dataset, gpus=gpus, debug=debug, strategy=strategy)

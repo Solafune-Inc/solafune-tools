@@ -50,7 +50,8 @@ warnings.filterwarnings("ignore")
 torch.autograd.set_detect_anomaly(False) # type: ignore
 torch.backends.cudnn.benchmark = True
 
-import os, sys, argparse, traceback
+import os, sys, argparse, traceback, json
+
 
 def is_dataset_folder_exist():
     train_dir_exist, test_dir_exist  = os.path.isdir("datasets/train"), os.path.isdir("datasets/test")
@@ -101,46 +102,57 @@ def train(using_own_dataset : bool = False, gpus: Union[int, str, List] = 1, deb
                                               val_loader_workers=2, awp_start_epoch=34,
                                               batch_size_log=False, use_total_steps=False,
                                               gpus=gpus, strategy=strategy))).items() if "__" not in k})
-    
+
     # Set Random Seed
     set_seed(cfg.seed)
-
     #######################################
     # Preprocess
     # それなりに時間がかかる処理なので処理済みのものを持ってくる形式にしたほうが良い気がする
     #######################################
+    with open("train_src/preprocess_state.json", "r") as f:
+        preprocess_json = json.load(f)
+    train_csv_path = cfg.DATA_ROOT / "train.csv"
 
-    PATHS_HIGH_TRAIN = sorted(glob(f"{cfg.ROOT_TRAIN}/train_*_high.tif"))
-    PATHS_LOW_TRAIN = sorted(glob(f"{cfg.ROOT_TRAIN}/train_*_low.tif"))
+    if preprocess_json[os.path.basename(__file__).split(".")[0]] == 0:
+        print("Rank 0: Preparing data and creating train.csv...")
+        if train_csv_path.exists():
+            os.remove(train_csv_path)
+        PATHS_HIGH_TRAIN = sorted(glob(f"{cfg.ROOT_TRAIN}/train_*_high.tif"))
+        PATHS_LOW_TRAIN = sorted(glob(f"{cfg.ROOT_TRAIN}/train_*_low.tif"))
 
-    df = pd.DataFrame({"path_high": PATHS_HIGH_TRAIN, "path_low": PATHS_LOW_TRAIN}) # type: ignore
-    #display(df.sample(4))
+        df = pd.DataFrame({"path_high": PATHS_HIGH_TRAIN, "path_low": PATHS_LOW_TRAIN}) # type: ignore
+        #display(df.sample(4))
 
-    meta_columns = [
-        f"{reso}_{feat}"
-        for reso in ["high", "low"]
-        for feat in [
-            "hight",
-            "width",
-            "dtype",
-            "r_mean",
-            "r_std",
-            "g_mean",
-            "g_std",
-            "b_mean",
-            "b_std",
+        meta_columns = [
+            f"{reso}_{feat}"
+            for reso in ["high", "low"]
+            for feat in [
+                "hight",
+                "width",
+                "dtype",
+                "r_mean",
+                "r_std",
+                "g_mean",
+                "g_std",
+                "b_mean",
+                "b_std",
+            ]
         ]
-    ]
 
-    df[meta_columns] = df.progress_apply(load_image_info, axis=1, result_type="expand")  # type: ignore
-    # fold
-    n_fold = np.zeros(len(df))
-    folder = KFold(n_splits=cfg.folds, shuffle=True, random_state=cfg.seed)
-    for fold, (_, val_idx) in enumerate(folder.split(range(len(df)))):  # type: ignore
-        n_fold[val_idx] = fold
-    df["fold"] = n_fold.astype(np.uint16)
-    #display(df.head(6))
-    df.to_csv(cfg.DATA_ROOT / "train.csv", index=False)
+        df[meta_columns] = df.progress_apply(load_image_info, axis=1, result_type="expand")  # type: ignore
+        # fold
+        n_fold = np.zeros(len(df))
+        folder = KFold(n_splits=cfg.folds, shuffle=True, random_state=cfg.seed)
+        for fold, (_, val_idx) in enumerate(folder.split(range(len(df)))):  # type: ignore
+            n_fold[val_idx] = fold
+        df["fold"] = n_fold.astype(np.uint16)
+        #display(df.head(6))
+        df.to_csv(train_csv_path, index=False)
+        preprocess_json[os.path.basename(__file__).split(".")[0]] = 1
+        with open("train_src/preprocess_state.json", "w") as f:
+            json.dump(preprocess_json, f, indent=4)
+
+        print("Rank 0: train.csv created successfully.")
 
     #######################################
     # load train df
@@ -229,51 +241,64 @@ def train(using_own_dataset : bool = False, gpus: Union[int, str, List] = 1, deb
         trainer.fit(model, datamodule=datamodule)
         print(Fore.CYAN + f"fold:{fold} validation score:", trainer.model.score_max) # type: ignore
 
-        del model, trainer, datamodule
-        torch.cuda.empty_cache()
-        # inference for test
-        """test_ds = CustomDataset(df=test_df, phase="test", tf_dict=tf_dict, cfg=cfg)
-        test_dl = DataLoader(test_ds, batch_size=cfg.val_loader.batch_size, shuffle=False)
-        model = SRModel.load_from_checkpoint(
-            cfg.outdir / (cfg.ckpt_stem + f"_fold{fold}.ckpt"), cfg=cfg, fold=fold
-        )
-        inferece_fn(model, test_dl, cfg.outdir / f"test_fold{fold}", cfg=cfg)
+        if trainer.is_global_zero:
+            pass
+            # inference for test
+            """test_ds = CustomDataset(df=test_df, phase="test", tf_dict=tf_dict, cfg=cfg)
+            test_dl = DataLoader(test_ds, batch_size=cfg.val_loader.batch_size, shuffle=False)
+            model = SRModel.load_from_checkpoint(
+                cfg.outdir / (cfg.ckpt_stem + f"_fold{fold}.ckpt"), cfg=cfg, fold=fold
+            )
+            inferece_fn(model, test_dl, cfg.outdir / f"test_fold{fold}", cfg=cfg)
 
-        del model, test_ds, test_dl"""
+            del model, test_ds, test_dl"""
+        
+        # Clean up for the next fold
+        del model, trainer, datamodule
         torch.cuda.empty_cache()
         gc.collect()
 
-    score_each_fold: dict[int, float] = defaultdict(lambda: None)  # type: ignore # foldごとのスコアを保存する辞書
+    is_main_process = not strategy or strategy == "ddp" and torch.distributed.get_rank() == 0
+    if is_main_process:
+        score_each_fold: dict[int, float] = defaultdict(lambda: None)  # type: ignore # foldごとのスコアを保存する辞書
 
-    oof_file_paths = []
-    oof_directories = sorted(cfg.outdir.glob("oof_data_fold*"))
-    for oof_directory in oof_directories:
-        # oof_directory: Path = cfg.outdir / f"oof_data_fold{fold}"
-        fold = int(oof_directory.name.split("fold")[-1])
-        oof_file_paths_fold = sorted(oof_directory.glob("train_*_oof.tif"))
-        score_each_fold[fold] = valid_fn(oof_file_paths=oof_file_paths_fold, cfg=cfg)
-        oof_file_paths.extend(oof_file_paths_fold)
+        oof_file_paths = []
+        oof_directories = sorted(cfg.outdir.glob("oof_data_fold*"))
+        for oof_directory in oof_directories:
+            # oof_directory: Path = cfg.outdir / f"oof_data_fold{fold}"
+            fold = int(oof_directory.name.split("fold")[-1])
+            oof_file_paths_fold = sorted(oof_directory.glob("train_*_oof.tif"))
+            score_each_fold[fold] = valid_fn(oof_file_paths=oof_file_paths_fold, cfg=cfg)
+            oof_file_paths.extend(oof_file_paths_fold)
 
-    score_each_fold[-1] = valid_fn(oof_file_paths=oof_file_paths, cfg=cfg)
-    print(Fore.CYAN + f"Overall CV: {score_each_fold[-1]:.6f}")
+        score_each_fold[-1] = valid_fn(oof_file_paths=oof_file_paths, cfg=cfg)
+        print(Fore.CYAN + f"Overall CV: {score_each_fold[-1]:.6f}")
 
-    # show scores
-    print("■" * 10 + "result" + "■" * 10)
-    score_str = []
-    for k in [-1] + list(range(cfg.folds)):
-        v = score_each_fold[k]
-        if k == -1:
-            k = " all"
-        if v is None:
-            score_str.append(" ")
-        else:
-            score_str.append(f"{v:.6f}")
-            print(f"fold{k}: {v:.6f}")
+        # show scores
+        print("■" * 10 + "result" + "■" * 10)
+        score_str = []
+        for k in [-1] + list(range(cfg.folds)):
+            v = score_each_fold[k]
+            if k == -1:
+                k = " all"
+            if v is None:
+                score_str.append(" ")
+            else:
+                score_str.append(f"{v:.6f}")
+                print(f"fold{k}: {v:.6f}")
 
-    print(", ".join(score_str))
-    # スプレッドシートにコピペできるように
+        print(", ".join(score_str))
+        # スプレッドシートにコピペできるように
 
-    #merge_inference(cfg.outdir)
+        #merge_inference(cfg.outdir)
+
+        # When all folds finished, return the preprocess state to 0
+        with open("train_src/preprocess_state.json", "r") as f:
+            preprocess_json = json.load(f)
+        preprocess_json[os.path.basename(__file__).split(".")[0]] = 0
+        with open("train_src/preprocess_state.json", "w") as f:
+            json.dump(preprocess_json, f, indent=4)
+
 
 def validate_gpus_argument(argument:str) -> Union[List, int]:
     try:

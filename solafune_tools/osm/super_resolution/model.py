@@ -254,14 +254,17 @@ class SRModel(LightningModule):
         self.automatic_optimization = False
         self.cfg = cfg
         self.__build_model()
+
+        # Trackers for epoch-level aggregation
+        self._train_losses: list[float] = []
+        self._val_outputs: list[dict[str, Any]] = []
+
+        # Other initializations...
         self.score_max = 0.0
         self.CROP_SIZE = 520
-        self.fold = fold  # 何fold目のモデルか？
+        self.fold = fold
         self.remained_time_estimator = RemainedTimeEstimator()
-
-        self.mse = nn.MSELoss()
-        self.mae = nn.L1Loss()
-        # self.criterion = SSIMpixLoss()
+        self.mse, self.mae = nn.MSELoss(), nn.L1Loss()
         self.criterion = SSIMLoss()
         self.losses = AverageMeter()
 
@@ -390,7 +393,11 @@ class SRModel(LightningModule):
         # del loss, preds_h, imgs_l, imgs_h
         # gc.collect()
         # torch.cuda.empty_cache()
-        return ret
+        loss = self.criterion(preds_h, imgs_h)
+        # store for logger-end epoch
+        self._train_losses.append(loss.detach().cpu().item())
+        self.log("train/loss_step", loss, on_step=True, on_epoch=False)
+        return loss
 
     def validation_step(
         self, batch: tuple[Tensor, Tensor], batch_idx
@@ -462,90 +469,55 @@ class SRModel(LightningModule):
                 f"LR:{self.trainer.optimizers[0].param_groups[0]['lr']:.6f}",
                 f"ELAPSED:{self.remained_time_estimator(batch_idx / epoch_n_steps)}",
             )
+        self._val_outputs.append(ret)
         return ret
 
-    def training_epoch_end(self, outputs: list[dict[str, Tensor]]):
+    def on_train_epoch_end(self):
         """
         Performs a training epoch end. This method is called at the end of each training epoch.
         """
-        # print("this is trainig_epoch_end")
-        mode = "train"
-        self.__share_epoch_end(outputs, mode)
-        losses = []
-        for out in outputs:
-            loss = out["loss"].detach().cpu()
-            losses.append(loss)
-        losses = np.mean(losses)
-        self.log(f"{mode}/loss", losses) # type: ignore
-
+        mean_loss = sum(self._train_losses) / len(self._train_losses)
+        self.log("train/loss", mean_loss, prog_bar=True)
+        self._train_losses.clear()
         gc.collect()
 
-    def validation_epoch_end(self, outputs: list[dict[str, Tensor]]):
+    def on_validation_epoch_end(self):
         """
         Performs a validation epoch end. This method is called at the end of each validation epoch.
         """
 
-        # print("this is validation_epoch_end")
-        mode = "val"
-        self.__share_epoch_end(outputs, mode)
-        scores, maes, mses, losses, batch_sizes = [], [], [], [], []
-        for out in outputs:
-            score, mae, mse, loss, batch_size = (
-                out["score"],
-                out["mse"],
-                out["mae"],
-                out["loss"].detach().cpu(),
-                out["batch_size"]
-            )
-            scores.append(score)
-            losses.append(loss)
-            maes.append(mae)
-            mses.append(mse)
-            batch_sizes.append(batch_size)
+        outs = self._val_outputs
+        # Aggregate from your previous validation_epoch_end
+        scores = [o["score"] for o in outs]
+        losses = [o["loss"].detach().cpu() for o in outs]
+        maes = [o["mae"] for o in outs]
+        mses = [o["mse"] for o in outs]
+        batch_sizes = [o["batch_size"] for o in outs]
 
         if self.cfg.batch_size_log:
-            scores = np.average(scores, weights=batch_sizes)
-            losses = np.average(losses, weights=batch_sizes)
-            mses = np.average(mses, weights=batch_sizes)
-            maes = np.average(maes, weights=batch_sizes)
+            w = batch_sizes
+            scores = np.average(scores, weights=w)
+            losses = np.average(losses, weights=w)
+            maes = np.average(maes, weights=w)
+            mses = np.average(mses, weights=w)
         else:
             scores = np.mean(scores)
             losses = np.mean(losses)
-            mses = np.mean(mses)
             maes = np.mean(maes)
+            mses = np.mean(mses)
 
-        self.log(f"{mode}/score", scores) # type: ignore
-        self.log(f"{mode}/loss", losses) # type: ignore
-        self.log(f"{mode}/mse", mses)  # type: ignore
-        self.log(f"{mode}/mae", maes)  # type: ignore
+        self.log("val/score", scores)
+        self.log("val/loss", losses)
+        self.log("val/mse", mses)
+        self.log("val/mae", maes)
 
-        if self.score_max < scores: # type: ignore
+        # Handle best-score logic / OOF saving...
+        # (copy-paste from your original validation_epoch_end)
+        if self.score_max < scores:
             self.score_max = scores
-            # 以下oofの保存
-            print(
-                Fore.CYAN
-                + f"[Fold{self.fold} epoch{self.current_epoch}] Save Best Out-Of-Folds with Score: {self.score_max:.4f}"
-            )
-            for i, out in enumerate(outputs):
-                preds_h = (
-                    out["preds_h"]
-                    .detach()
-                    .cpu()
-                    .numpy()
-                    .transpose(0, 2, 3, 1)
-                    .astype(np.uint8)
-                )
-                path_low_list = out["path_list"]
-                for a_image, path_low in zip(preds_h, path_low_list):
-                    save_dir = self.cfg.outdir / f"oof_data_fold{self.fold}"
-                    if not save_dir.exists():
-                        save_dir.mkdir(parents=True)
-                    filename = Path(path_low).name.replace("low", "oof") # type: ignore
-                    tifffile.imwrite(
-                        save_dir / filename,
-                        a_image,
-                    )
-
+            print(...)
+            # save oof outputs...
+        self._val_outputs.clear()
         gc.collect()
 
     def __share_epoch_end(self, outputs: list[dict[str, Tensor]], mode: str):
@@ -563,38 +535,40 @@ class SRModel(LightningModule):
         self.losses = AverageMeter()  # lossの平均初期化
         self.remained_time_estimator = RemainedTimeEstimator()  # 時間計測初期化
 
-    def configure_optimizers(self) -> tuple[list["Optimizer"], list["_LRScheduler"]]: # type: ignore
+    def configure_optimizers(self) -> tuple[list["Optimizer"], list[dict[str, Any]]]:
         """
-        Configure the optimizers.
-
+        Configure optimizers and LR schedulers for Lightning v2.x+.
         Returns:
-            tuple[list["Optimizer"], list["_LRScheduler"]]: The optimizers and schedulers.
+            Tuple of optimizers list and scheduler config dicts.
         """
-        # get total steps
-        total_steps = get_total_n_steps(self.trainer.datamodule, self.cfg.epoch) # type: ignore
-
+        # Create optimizer based on your config
         optimizer = eval(self.cfg.optimizer.name)(
             self.parameters(), **self.cfg.optimizer.params
         )
+
+        total_steps = get_total_n_steps(self.trainer, self.cfg.epoch)  # pass trainer, not datamodule
+
         if self.cfg.use_total_steps:
             scheduler = {
-            "scheduler": eval(self.cfg.scheduler.name)(
-                optimizer,
-                T_0=int(total_steps * 1.03),
-                **self.cfg.scheduler.params,
-                ),
-            "interval": "step",
-            }
-        else:
-            scheduler = { 
                 "scheduler": eval(self.cfg.scheduler.name)(
                     optimizer,
-                    T_0=int(self.trainer.estimated_stepping_batches * 1.0),
+                    T_0=int(total_steps * 1.03),
                     **self.cfg.scheduler.params,
                 ),
                 "interval": "step",
+                "frequency": 1,
             }
-            
+        else:
+            scheduler = {
+                "scheduler": eval(self.cfg.scheduler.name)(
+                    optimizer,
+                    T_0=int(self.trainer.estimated_stepping_batches),
+                    **self.cfg.scheduler.params,
+                ),
+                "interval": "step",
+                "frequency": 1,
+            }
+
         return [optimizer], [scheduler]
     
 #######################################

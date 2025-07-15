@@ -515,7 +515,7 @@ class SRModel(LightningModule):
         # (copy-paste from your original validation_epoch_end)
         if self.score_max < scores:
             self.score_max = scores
-            print(...)
+            logging.info(f"New best score achieved: {scores}. Saving OOF outputs...")
             # save oof outputs...
         self._val_outputs.clear()
         gc.collect()

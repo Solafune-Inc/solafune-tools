@@ -30,7 +30,7 @@ class OSMResourceDownloader:
     Methods:
         - __init__(self) -> None: Initializes the Datasets class and creates necessary directories.
     """
-    def __init__(self, model_name = None) -> None:
+    def __init__(self) -> None:
         """
         Initializes the OSMResourceDownloader class and sets up the necessary directories and URLs for datasets.
         Parameters:

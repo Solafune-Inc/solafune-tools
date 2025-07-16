@@ -45,10 +45,14 @@ class OSMResourceDownloader:
         self.datasets_dir = os.path.join(os.getcwd(), "datasets/")
         self.chunk_size = 1024
         os.makedirs(self.datasets_dir, exist_ok=True)
+        
+        base_url = "https://ywbul658zi.execute-api.us-west-2.amazonaws.com/dev/download/"
 
         self.model_url = {
-            "super_resolution": "https://ywbul658zi.execute-api.us-west-2.amazonaws.com/dev/download/5x_super_resolution"
+            "super_resolution_v1": f"{base_url}5x_super_resolution_v1",
+            "super_resolution_v2": f"{base_url}5x_super_resolution_v2",
         }
+
         user_dir = os.path.expanduser(os.path.join("~", "temp"))
         self.model_weights_dir = os.path.join(user_dir, "weights")
         os.makedirs(self.model_weights_dir, exist_ok=True)

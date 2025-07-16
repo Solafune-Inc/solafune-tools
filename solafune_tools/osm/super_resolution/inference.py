@@ -102,7 +102,7 @@ class Model:
             models.append(model.to(cfg.device))
         return models
 
-    def _load_models(self) -> List[SRModel]:
+    def _load_models(self, version:str = "v2") -> List[SRModel]:
         """
         Tries to load models from a series of potential local directories.
         If all attempts fail, it downloads the models and then loads them.
@@ -123,10 +123,10 @@ class Model:
         # If models were not found in any local path, download them
         print("Local models not found. Downloading from OSM resource downloader...")
         downloader = OSMResourceDownloader()
-        status, _ = downloader.model_weight_download("super_resolution") # Returns status, but we assume success if it doesn't raise an error
+        status, _ = downloader.model_weight_download(f"super_resolution_{version}") # Returns status, but we assume success if it doesn't raise an error
         print(f"Download status: {status}")
 
-        models_dir = os.path.join(downloader.model_weights_dir, "super_resolution")
+        models_dir = os.path.join(downloader.model_weights_dir, f"super_resolution_{version}")
         print(f"Attempting to load downloaded models from: {models_dir}")
         downloaded_models = self._load_models_from_path(models_dir)
         

@@ -14,7 +14,7 @@
 
 This library package is an integrated open-source tool for Solafune developers, Solafune hackers, scientists, engineers, students, and anyone interested in geospatial data analysis. The solafune-tools contain many tools to help you develop your analysis like downloading STAC catalogs and Sentinel-2 imagery (from Planetary Computer) and then assembling it into a cloudless mosaic, competition_tools, community_tools, and other tools in geospatial data analysis. Other tools also will be added in the future.
 
-### April 2025: Added new metrics, dependencies flexibility.
+### April 2025: Added 5x Super-Resolution from the competition!
 
 ## Quickstart
 
@@ -22,6 +22,12 @@ Install the package using `pip` or `uv pip`, recommend using `python >= 3.10`:
 
 ```bash
 uv pip install solafune_tools
+```
+
+You can also install the add-on requirements like the our 5x Super Resolution model from the competition.
+
+```bash
+uv pip install solafune_tools[super_resolution]
 ```
 
 All public-facing functions have detailed docstrings explaining their expected inputs and outputs. You can check any of them through `print(solafune_tools.function_name.__doc__)` (if you don't use print it shows as an unstructured string) or `??solafune_tools.function_name` in the jupyter notebooks.

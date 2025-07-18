@@ -24,13 +24,17 @@ Install the package using `pip` or `uv pip`, recommend using `python >= 3.10`:
 uv pip install solafune_tools
 ```
 
-You can also install the add-on requirements like the our 5x Super Resolution model from the competition.
+You can also install the add-on requirements, like our 5x Super Resolution model from the competition.
 
 ```bash
 uv pip install solafune_tools[super_resolution]
 ```
+Or to install all the add-ons, you can also do this
+```bash
+uv pip install solafune_tools[full]
+```
 
-All public-facing functions have detailed docstrings explaining their expected inputs and outputs. You can check any of them through `print(solafune_tools.function_name.__doc__)` (if you don't use print it shows as an unstructured string) or `??solafune_tools.function_name` in the jupyter notebooks.
+All public-facing functions have detailed docstrings explaining their expected inputs and outputs. You can check any of them through `print(solafune_tools.function_name.__doc__)` (if you don't use print it shows as an unstructured string) or `??solafune_tools.function_name` in the Jupyter notebooks.
 Before using the library, you can set the directory where you want to store data by calling.
 
 ```python

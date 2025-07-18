@@ -21,7 +21,8 @@ file = ["requirements/super_resolution.txt"]
 
 # Optional dependencies for full installation
 [tool.setuptools.dynamic.optional-dependencies.full]
-file = ["requirements/super_resolution.txt"] 
+file = ["requirements/base.txt",
+        "requirements/super_resolution.txt"] 
 
 [tool.setuptools.packages.find]
 exclude = ["data", "docs"]

@@ -5,7 +5,7 @@ This write-up is for model inference and model training of Super Resolution rele
 ### Model Perfomance
 
 #### Inference Time
-
+Currently not supporting Silicon’s NPU and other's NPU from AMD/Intel devices because 'aten::_upsample_bicubic2d_aa.out' is not currently implemented for the NPU device in PyTorch ≤ 2.7.1, not sure when this supported.
 Devices | Warming up first Model’s Weight |   | Warmed up Model’s Weight |  
 -- | -- | -- | -- | --
   | Normal Input (130x130x3) | Large Input (2048x2048x3) | Normal Input (130x130x3) | Large Input (2048x2048x3)

@@ -1,6 +1,28 @@
 # 5x Super Resolution
 ## Model Card Description
 This write-up is for model inference and model training of Super Resolution released by Solafune. This x5 super resolution model is based on Team N's solution, the first place in the competition of [5x Super Resolution Competition](https://solafune.com/competitions/7a1fc5e3-49bd-4ec1-8378-974951398c98?menu=about&tab=overview). The model was based on SWIN2SR and developed into 5x super resolution.
+
+### Model Perfomance
+
+#### Inference Time
+
+Devices | Warming up first Model’s Weight |   | Warmed up Model’s Weight |  
+-- | -- | -- | -- | --
+  | Normal Input (130x130x3) | Large Input (2048x2048x3) | Normal Input (130x130x3) | Large Input (2048x2048x3)
+CPU (M3 Max) | 10.71 seconds | 505.90 seconds | 6.08 seconds | 489.89 seconds
+GPU (H200) | 7.66 seconds | 17.77 seconds | 0.27 seconds | 10.27 seconds
+
+#### Strutural Similarity Score
+
+Against the test data that Solafune has provided, these models achieved considerable high score to created 5x Super Resolutio Model.
+
+| Team Name | SSIM Score | Model Used |
+| --- | --- | --- |
+| Team N | 0.7834532752171123 | SWIN2SR |
+| KagoAI | 0.7806289163209503 | SWIN2SR |
+| roniheka | 0.779554528772468 | RCAN |
+
+
 ## Usage
 To run the model inference and training without any constraint, this step must be followed thoroughly
 ### Installing the Requirements
@@ -17,26 +39,35 @@ To run the model inference and training without any constraint, this step must b
      ```
 
 ### Running the inference modules
-  #### Module Import
-   To run the inference using python `solafune_tools` library import, you can use this usage tutorial to help you first time using this 5x Super Resolution model inference. Please prepare the first image you want the inference first. JPG/JPEG, PNG, TIF, and TIFF are the acceptable file extensions but basically as long as the format is numpyArray also acceptable. This example lines of code will let you run the model inference.
-  ```python
-  from solafune_tools.osm.super_resolution.inference import Model
-  import tifffile
-  
-  SR_Inference = Model()
+#### Module Import
+To run the inference using python `solafune_tools` library import, you can use this usage tutorial to help you first time using this 5x Super Resolution model inference. Please prepare the first image you want the inference first. JPG/JPEG, PNG, TIF, and TIFF are the acceptable file extensions but basically as long as the format is numpyArray also acceptable. This example lines of code will let you run the model inference.
+```python
+from solafune_tools.osm.super_resolution.inference import Model
+import tifffile
+import cv2
 
-  img_array = tifffile.TiffFile("test.tif").asarray() # Make sure the input is in RGB bands, if you are using cv2, you might want to convert it first to RGB from BGR
-  img_result = SR_Inference.generate(img_array)
+SR_Inference = Model()
 
-  tifffile.imwrite("result.tif", img_result)
-  ```
-  #### Bash/CMD panel Interface
-   To run the inference through bash/cmd panel interface, please prepare the first image you want the inference first. JPG/JPEG, PNG, TIF, and TIFF are the acceptable file extensions. This bash example will let you run the model inference.
-   ```bash
-   python inference.py --input sample_input/large.png # This will lead to the default output saved in the output/output.tif
-   or
-   python inference.py --input sample_input/small.tif --output example.jpg # The output will be written in the current directory with the desired name and extension.
-   ```
+# When using this model, we only accept RGB image only with dimension of 130x130. So we recommended you to slice your
+# image into the said acceptable dimension first.
+img_array = tifffile.TiffFile("small.tif").asarray() # Make sure the input is in RGB bands, if you are using cv2, you might want to convert it first to RGB from BGR
+img_result = SR_Inference.generate(img_array)
+
+# We also accept large image if the said dimension is more than threshold of 360x360 and with maximum of 2000x2000 in dimension.
+img_array = cv2.imread("sample_input/large.jpg")
+img_array = cv2.cvtColor(img_array, cv2.COLOR_BGR2RGB)
+img_result = SR_Inference.generate(img_array)
+
+
+tifffile.imwrite("result.tif", img_result)
+```
+#### Bash/CMD panel Interface
+To run the inference through bash/cmd panel interface, please prepare the first image you want the inference first. JPG/JPEG, PNG, TIF, and TIFF are the acceptable file extensions. This bash example will let you run the model inference.
+```bash
+python inference.py --input sample_input/large.png # This will lead to the default output saved in the output/output.tif
+or
+python inference.py --input sample_input/small.tif --output example.jpg # The output will be written in the current directory with the desired name and extension.
+```
 
 ### Running the model training
    > You can use your dataset or the competition dataset

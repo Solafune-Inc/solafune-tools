@@ -7,3 +7,4 @@ This side of the repository contains documentation for developed tools in solafu
 2. [Metrics Toolset](metrics_toolset.md)
 3. [Community Tools](community_tools/README.md)
 4. [Competition Tools](competition_tools/README.md)
+5. [Open Sourced Model](open_sourced_model.md)

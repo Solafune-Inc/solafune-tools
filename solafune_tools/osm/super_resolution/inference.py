@@ -317,7 +317,7 @@ if __name__ == "__main__":
         os.makedirs(img_output.split("/")[0], exist_ok=True)
 
     if img_output.endswith(".tif") or img_output.endswith(".tiff"):
-        img_result = cv2.cvtColor(img_result, cv2.COLOR_RGB2BGR)
+        #img_result = cv2.cvtColor(img_result, cv2.COLOR_RGB2BGR)
         tifffile.imwrite(img_output, img_result)
     else:
         cv2.imwrite(img_output, img_result)

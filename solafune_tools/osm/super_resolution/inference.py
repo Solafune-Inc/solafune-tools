@@ -293,18 +293,18 @@ if __name__ == "__main__":
     parser.add_argument("--input", type=str, required=True)
     parser.add_argument("--output", type=str, default="output/output.tif")
     args = parser.parse_args()
-    img_input = str(args.input)
-    img_output = str(args.output)
+    img_input_dir = str(args.input)
+    img_output_dir = str(args.output)
 
-    output_dir = os.path.dirname(img_output)
+    output_dir = os.path.dirname(img_output_dir)
     # Ensure the output directory exists, but only if a directory path is specified
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
 
-    if img_input.endswith(".tif") or img_input.endswith(".tiff"):
-        img_input = tifffile.TiffFile(img_input).asarray() # Make sure the input is in RGB bands
+    if img_input_dir.endswith(".tif") or img_input_dir.endswith(".tiff"):
+        img_input = tifffile.TiffFile(img_input_dir).asarray() # Make sure the input is in RGB bands
     else:
-        img_input = cv2.imread(img_input)
+        img_input = cv2.imread(img_input_dir)
 
     swin2sr_teamN_infer = Model()
 
@@ -313,13 +313,19 @@ if __name__ == "__main__":
         print(img_result)
         exit(1)
 
-    if img_output == "output/output.tif":
-        os.makedirs(img_output.split("/")[0], exist_ok=True)
+    if img_output_dir == "output/output.tif":
+        os.makedirs(img_output_dir.split("/")[0], exist_ok=True)
 
-    if img_output.endswith(".tif") or img_output.endswith(".tiff"):
-        #img_result = cv2.cvtColor(img_result, cv2.COLOR_RGB2BGR)
-        tifffile.imwrite(img_output, img_result)
+    # Save the output image based on input/output file types
+    input_ext = os.path.splitext(img_input_dir)[1].lower()
+    output_ext = os.path.splitext(img_output_dir)[1].lower()
+
+    if output_ext in [".tif", ".tiff"]:
+        # Convert to BGR if input is jpg/png and output is tif
+        if input_ext in [".jpg", ".jpeg", ".png"]:
+            img_result = cv2.cvtColor(img_result, cv2.COLOR_RGB2BGR)
+        tifffile.imwrite(img_output_dir, img_result)
     else:
-        cv2.imwrite(img_output, img_result)
+        cv2.imwrite(img_output_dir, img_result)
 
     print(f"Processing time: {time.time() - start_time} seconds")

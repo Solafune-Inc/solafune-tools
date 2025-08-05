@@ -1,8 +1,10 @@
 import json
 import os
 import shutil
+from typing import Tuple, Union
+from solafune_tools.competition_tools.quality_checker import check_dict, return_error_message
 
-def load_file(file_path) -> str:
+def load_file(file_path) -> Union[dict, str]:
     """
     Loads a JSON file from the given file path.
 
@@ -18,114 +20,22 @@ def load_file(file_path) -> str:
     except Exception as e:
         return "File not found or not a json format"
 
-def check_dict(p_dict: dict = None, ann_type: str = "segmentation"):
-    """
-    Check the format of the prediction dictionaries.
-    Error codes:
-        0: No errors
-        1: Invalid format, missing "images" key, or "images" is not a list
-        2: Invalid format, image file name not found in ground truth from the prediction
-        3: Invalid format, missing "annotations" key, or "annotations" is not a list in one of the images
-        4: Invalid format, missing "bbox/segmentation" key, or "bbox/segmentation" is not a list in one of the annotations
-        5: Invalid format, one of bbox/segmentation list length is less than 4 or not even in one of the annotations
-        6: Invalid format, missing "class" key in one of the annotations
-        7: Invalid format, missing "width" or "height" key in one of the images
-    """
-    if not p_dict:
-        return 1, None
-    
-    if p_dict is None:
-        return 1, None
-    
-    if not "images" in p_dict:
-        return 1, None
-    
-    if not isinstance(p_dict["images"], list):
-        return 1, None
-    
-    for image in p_dict["images"]:
-        if not "file_name" in image:
-            return 2, None
-        
-        if not "annotations" in image:
-            return 3, None
-        
-        if not isinstance(image["annotations"], list):
-            return 3, None
-        
-        for anno in image["annotations"]:
-            if not ann_type in anno:
-                return 4, None
-            
-            if not isinstance(anno[ann_type], list):
-                return 4, None
-            
-            if len(anno[ann_type]) % 2 != 0:
-                return 5, None
-            
-            if ann_type == "bbox" and len(anno[ann_type]) != 4:
-                return 5, None
-            
-            if len(anno[ann_type]) < 4:
-                return 5, None
-            
-            if not "class" in anno:
-                return 6, None
-            
-        if not "width" in image:
-            return 7, None
-        
-        if not "height" in image:
-            return 7, None
-    
-    return 0, len(p_dict["images"])
-
-def return_error_message(error_code: int, filetype: str = "json"):
-    """
-    Set the error messages of the prediction dictionaries or zipfile.
-    Error codes:
-        0: No errors
-        1: Invalid format, missing "images" key, or "images" is not a list
-        2: Invalid format, no file_name key found in one of the images
-        3: Invalid format, missing "annotations" key, or "annotations" is not a list in one of the images
-        4: Invalid format, missing "bbox/segmentation" key, or "bbox/segmentation" is not a list in one of the annotations
-        5: Invalid format, one of bbox/segmentation list length is less than 4 or not even in one of the annotations
-        6: Invalid format, missing "class" key in one of the annotations
-        7: Invalid format, missing "width" or "height" key in one of the images
-    """
-    if filetype == "json":
-        if error_code == 0:
-            return "Valid"
-        elif error_code == 1:
-            return "Invalid format, missing 'images' key, or 'images' is not a list."
-        elif error_code == 2:
-            return "Invalid format, missing 'file_name' key in one of the images."
-        elif error_code == 3:
-            return "Invalid format, missing 'annotations' key, or 'annotations' is not a list in one of the images."
-        elif error_code == 4:
-            return "Invalid format, missing 'bbox/segmentation' key, or 'bbox/segmentation' is not a list in one of the annotations."
-        elif error_code == 5:
-            return "Invalid format, one of bbox/segmentation list length is less than 4 or not even in one of the annotations."
-        elif error_code == 6:
-            return "Invalid format, missing 'class' key in one of the annotations."
-        elif error_code == 7:
-            return "Invalid format, missing 'width' or 'height' key in one of the images."
-        
-    elif filetype == "zip":
-        if error_code == 1:
-            return "Error extracting zip file."
-        elif error_code == 2:
-            return "Either bbox.json or segmentation.json not found."
-        elif error_code == 9:
-            return "Error extracting zip file."
-
-def json_submission_validator(file_path: str = None, pdict: dict = None, ann_type: str = None) -> str:
+def json_submission_validator(gt_file_path: str = "", pred_file_path: str = "",
+                              gt_dict: dict = {}, pred_dict: dict = {},
+                              ann_type: str = "",
+                              use_dimensions: bool = False, 
+                              use_scene: bool = False,
+                              use_resolution: bool = False,
+                              use_confidence: bool = False) -> str:
     """
     Validates a submission either from a file path or a dictionary.
 
     Args:
-        file_path (str, optional): The path to the JSON file to validate.
-        pdict (dict, optional): The dictionary to validate.
+        gt_file_path (str, optional): The path to the ground truth JSON file.
+        pred_file_path (str): The path to the prediction JSON file.
+        gt_dict (dict, optional): The ground truth dictionary.
+        pred_dict (dict): The prediction dictionary.
+        ann_type (str): The type of annotation, e.g., 'segmentation' or 'bbox'.
 
     Returns:
         str: The validation result message.
@@ -134,37 +44,70 @@ def json_submission_validator(file_path: str = None, pdict: dict = None, ann_typ
     Raises:
         ValueError: If neither file_path nor pdict is provided.
     """
-    if file_path is not None and ann_type is not None:
-        pdict = load_file(file_path)
-        if pdict == "File not found":
-            return "File not found", 0
-        err_code, num_image = check_dict(pdict, ann_type = ann_type)
-        check = return_error_message(err_code, filetype = "json")
-        return check, num_image
-    
-    if pdict is not None and ann_type is not None:
-        err_code, num_image = check_dict(pdict, ann_type = ann_type)
-        check = return_error_message(err_code, filetype = "json")
-        return check, num_image
+    if pred_file_path != "" and ann_type != "":
+        if gt_file_path:
+            gtdict = load_file(gt_file_path)
+            if isinstance(gtdict, str):
+                gtdict = {}
+        else:
+            gtdict = {}
+        pdict = load_file(pred_file_path)
+        if isinstance(pdict, str):
+            return pdict
+        err_code = check_dict(gt_dict=gtdict, pd_dict=pdict, ann_type=ann_type,
+                               use_dimensions=use_dimensions, use_scene=use_scene,
+                               use_resolution=use_resolution, use_confidence=use_confidence)
+        check = return_error_message(err_code, filetype="json")
+        return check
+
+    elif pred_dict != "" and ann_type != "":
+        err_code = check_dict(gt_dict=gt_dict, pd_dict=pred_dict, ann_type=ann_type,
+                               use_dimensions=use_dimensions, use_scene=use_scene,
+                               use_resolution=use_resolution, use_confidence=use_confidence)
+        check = return_error_message(err_code, filetype="json")
+        return check
 
     raise ValueError("No file_path or pdict provided or ann_type is not provided")
 
 def main(args):
-    file_path = args.file_path
+    gt_file_path = args.gt_file_path
+    pred_file_path = args.pred_file_path
     ann_type = args.ann_type
-    pdict = load_file(file_path)
-    if pdict == "File not found":
-        print("File not found")
-        return
-    
-    check = check_dict(pdict, ann_type = ann_type)
-    print(check)
+    use_dimensions = args.use_dimensions
+    use_scene = args.use_scene
+    use_resolution = args.use_resolution
+    use_confidence = args.use_confidence
+
+    if gt_file_path:
+        gtdict = load_file(gt_file_path)
+        if isinstance(gtdict, str):
+            gtdict = {}
+    else:
+        gtdict = {}
+    pdict = load_file(pred_file_path)
+    if isinstance(pdict, str):
+        return pdict
+    err_code = check_dict(gt_dict=gtdict, pd_dict=pdict, ann_type=ann_type,
+                            use_dimensions=use_dimensions, use_scene=use_scene,
+                            use_resolution=use_resolution, use_confidence=use_confidence)
+    check = return_error_message(err_code, filetype="json")
     return check
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--file_path", type=str, help="Path to the file")
-    parser.add_argument("--ann_type", type=str, help="Type of annotation, eg. 'segmentation' or 'bbox'")
+    parser.add_argument('--gt_file_path', type=str, default="", help='Path to the ground truth JSON file')
+    parser.add_argument('--pred_file_path', type=str, default="", help='Path to the prediction JSON file')
+    parser.add_argument('--ann_type', type=str, required=True, help='Type of annotation (e.g., "segmentation", "bbox")')
+    parser.add_argument('--use_dimensions', action='store_true', help='Use dimensions in validation')
+    parser.add_argument('--use_scene', action='store_true', help='Use scene type in validation')
+    parser.add_argument('--use_resolution', action='store_true', help='Use resolution in validation')
+    parser.add_argument('--use_confidence', action='store_true', help='Use confidence score in validation')
+
     args = parser.parse_args()
-    main(args)
+    result = main(args)
+    print(result)
+    if isinstance(result, str):
+        print(result)
+    else:
+        print("Validation completed successfully.")

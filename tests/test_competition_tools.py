@@ -35,16 +35,14 @@ def test_segmentation_submission_from_var():
             }
         ]
     }
-    validated_submission, num_images = solafune_dataset.json_submission_validator(pdict = submission_dict, ann_type = "segmentation")
+    validated_submission = solafune_dataset.json_submission_validator(pred_dict = submission_dict, ann_type = "segmentation")
     assert validated_submission == "Valid"
-    assert num_images == 1
 
 def test_segmentation_submission_from_file():
     # From file
     submission_file = "tests/data-test/sample_segmentation.json"
-    validated_submission, num_images = solafune_dataset.json_submission_validator(file_path = submission_file, ann_type = "segmentation")
+    validated_submission = solafune_dataset.json_submission_validator(pred_file_path = submission_file, ann_type = "segmentation")
     assert validated_submission == "Valid"
-    assert num_images == 1717
 
 def test_bbox_submission_from_var():
     # From variable
@@ -77,13 +75,11 @@ def test_bbox_submission_from_var():
             }
         ]
     }
-    validated_submission, num_images = solafune_dataset.json_submission_validator(pdict = submission_dict, ann_type = "bbox")
+    validated_submission = solafune_dataset.json_submission_validator(pred_dict = submission_dict, ann_type = "bbox")
     assert validated_submission == "Valid"
-    assert num_images == 1
 
 def test_bbox_submission_from_file():
     # From file
     submission_file = "tests/data-test/sample_bbox.json"
-    validated_submission, num_images = solafune_dataset.json_submission_validator(file_path = submission_file, ann_type = "bbox")
+    validated_submission = solafune_dataset.json_submission_validator(pred_file_path = submission_file, ann_type = "bbox")
     assert validated_submission == "Valid"
-    assert num_images == 400

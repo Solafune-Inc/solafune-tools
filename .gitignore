@@ -12,3 +12,4 @@ solafune_tools/osm/super_resolution/src/
 solafune_tools/osm/super_resolution/datasets/
 solafune_tools/osm/super_resolution/working/
 solafune_tools/osm/super_resolution/weights/
+.DS_Store

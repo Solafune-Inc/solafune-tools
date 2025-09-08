@@ -1,4 +1,5 @@
 from shapely.geometry import Polygon
+from shapely.errors import GEOSException
 import numpy as np
 from tqdm import tqdm
 from rasterio.features import rasterize
@@ -30,23 +31,30 @@ class IOUBasedMetrics:
         """
         Computes the Intersection over Union (IoU) between two polygons.
 
+        Attempts to repair invalid polygons using buffer(0). If repair fails or
+        other geometric errors occur, returns 0.0.
+
         Args:
             polygon1 (Polygon): The first Shapely Polygon object.
             polygon2 (Polygon): The second Shapely Polygon object.
 
         Returns:
             float: The IoU value, ranging from 0.0 to 1.0. Returns 0.0 if
-                   polygons are invalid or union area is zero.
+                   polygons are invalid (even after repair attempt), empty/zero-area,
+                   or if union area is zero.
         """
-        if not polygon1.is_valid: polygon1 = polygon1.buffer(0)
-        if not polygon2.is_valid: polygon2 = polygon2.buffer(0)
-        if not polygon1.is_valid or not polygon2.is_valid: return 0.0
+        # Repair if invalid, using new variables to avoid mutating inputs
+        repaired_poly1 = polygon1.buffer(0) if not polygon1.is_valid else polygon1
+        repaired_poly2 = polygon2.buffer(0) if not polygon2.is_valid else polygon2
+        
+        if not repaired_poly1.is_valid or not repaired_poly2.is_valid:
+            return 0.0
 
         try:
-            intersection_area = polygon1.intersection(polygon2).area
-            union_area = polygon1.area + polygon2.area - intersection_area
-        except Exception:
-            return 0.0 # Handle potential Shapely errors
+            intersection_area = repaired_poly1.intersection(repaired_poly2).area
+            union_area = repaired_poly1.area + repaired_poly2.area - intersection_area
+        except GEOSException:
+            return 0.0  # Handle Shapely-specific geometric errors
 
         # IoU calculation
         return intersection_area / union_area if union_area > 0 else 0.0

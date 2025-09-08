@@ -355,6 +355,75 @@ def test_iou_based_compute_map_segmentation_perfect_score():
     map_score = MAP.compute_map(true_polygons, pred_polygons, iou_thresholds=0.5)
     assert map_score == 1
 
+### Test for the IOUBasedMetrics of Segmentation Dice Coefficient
+def test_iou_based_dice_coefficient_segmentation():
+    polygon1 = [Polygon([(1, 2), (2, 4), (3, 1)]), 1.0 ]
+    polygon2 = [Polygon([(0, 0), (1, 3), (2, 2), (3, 0)]), 1.0 ]
+    polygon3 = [Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3)]), 1.0 ]
+    polygon4 = [Polygon([(2, 2), (3, 4), (4, 4), (5, 2), (3, 1)]), 1.0 ]
+    polygon5 = [Polygon([(4, 4), (5, 6), (7, 7), (8, 5), (7, 4)]), 1.0 ]
+    polygon6 = [Polygon([(1, 1), (2, 3), (3, 3), (2, 1)]), 0.75 ]
+    polygon7 = [Polygon([(3, 3), (4, 5), (6, 5), (7, 3), (5, 2)]), 1.0]
+    
+    true_polygons = [polygon1[0], polygon3[0], polygon5[0], polygon7[0]] 
+    pred_polygons = [polygon1, polygon2, polygon3, polygon7]
+    
+    DC = IOUBasedMetrics()
+    dice_coefficient = DC.compute_dice(true_polygons, pred_polygons, iou_threshold=0.5)
+
+    assert round(dice_coefficient,1) == 0.8
+
+def test_iou_based_dice_coefficient_segmentation_perfect_score():
+    true_polygons = [
+        Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3), (5, 5)]),
+        Polygon([(4, 4), (5, 6), (7, 7), (8, 5), (7, 4), (4, 4)]),
+        Polygon([(3, 3), (4, 5), (6, 5), (7, 3), (5, 2), (3, 3)]),
+    ]
+    pred_polygons = [
+        [Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3), (5, 5)]), 0.8],
+        [Polygon([(4, 4), (5, 6), (7, 7), (8, 5), (7, 4), (4, 4)]), 0.9],
+        [Polygon([(3, 3), (4, 5), (6, 5), (7, 3), (5, 2), (3, 3)]), 0.6],
+    ]
+    DC = IOUBasedMetrics()
+    dice_coefficient = DC.compute_dice(true_polygons, pred_polygons, iou_threshold=0.5)
+    assert dice_coefficient == 1.0
+
+def test_iou_based_dice_coefficient_segmentation_zero_score():
+    true_polygons = [
+        Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3), (5, 5)]),
+        Polygon([(4, 4), (5, 6), (7, 7), (8, 5), (7, 4), (4, 4)]),
+        Polygon([(3, 3), (4, 5), (6, 5), (7, 3), (5, 2), (3, 3)]),
+    ]
+    pred_polygons = [
+        [Polygon([(20, 20), (21, 21), (22, 20), (23, 19), (20, 18), (20, 20)]), 0.5],
+        [Polygon([(30, 30), (31, 32), (33, 33), (34, 31), (33, 30), (30, 30)]), 0.7],
+        [Polygon([(40, 40), (41, 42), (43, 42), (44, 40), (42, 39), (40, 40)]), 0.6],
+    ]
+    DC = IOUBasedMetrics()
+    dice_coefficient = DC.compute_dice(true_polygons, pred_polygons, iou_threshold=0.5)
+    assert dice_coefficient == 0.0
+
+def test_iou_based_dice_coefficient_segmentation_same_score_with_dif_order():
+    true_polygons = [
+        Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3), (5, 5)]),
+        Polygon([(4, 4), (5, 6), (7, 7), (8, 5), (7, 4), (4, 4)]),
+        Polygon([(3, 3), (4, 5), (6, 5), (7, 3), (5, 2), (3, 3)]),
+    ]
+    pred_polygons = [
+        [Polygon([(7, -3), (8, -2), (9, -3), (10, -4), (7, -5), (7, -3)]), 1.0],
+        [Polygon([(9, 8), (10, 10), (12, 11), (13, 9), (12, 8), (9, 8)]), 0.8],
+        [Polygon([(4, 4), (5, 6), (7, 6), (8, 4), (6, 3), (4, 4)]), 0.9],
+    ]
+    true_order_1 = [1, 0]
+    pred_order_1 = [0]
+    true_order_2 = [0]
+    pred_order_2 = [1]
+    DC = IOUBasedMetrics()
+    dice_coefficient_1 = DC.compute_dice([true_polygons[i] for i in true_order_1], [pred_polygons[i] for i in pred_order_1], iou_threshold=0.5)
+    dice_coefficient_2 = DC.compute_dice([true_polygons[i] for i in true_order_2], [pred_polygons[i] for i in pred_order_2], iou_threshold=0.5)
+    
+    assert math.isclose(dice_coefficient_1, dice_coefficient_2, rel_tol=1e-9)
+
 # ---------------------> Below are the tests for PixelBasedMetrics
 
 def test_pixel_based_polygon_to_mask():

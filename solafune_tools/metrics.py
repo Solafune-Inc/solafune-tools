@@ -20,6 +20,83 @@ def bbox_to_polygon(bbox: Union[tuple, list]) -> Polygon:
         (x_min, y_min), (x_min + width, y_min), (x_min + width, y_min + height), (x_min, y_min + height)
     ])
 
+def getDiceScore(poly1: Polygon, poly2: Polygon) -> float:
+        """
+        Helper: Compute Dice coefficient between two polygons.
+
+        Returns 0.0 if either polygon is invalid, empty (zero-area), or if the sum of areas is zero
+        to avoid division by zero. Empty or zero-area polygons are treated as having no overlap.
+        """
+        if not poly1.is_valid or not poly2.is_valid:
+            return 0.0
+        inter = poly1.intersection(poly2).area
+        return (2 * inter) / (poly1.area + poly2.area) if (poly1.area + poly2.area) > 0 else 0.0 
+
+def compute_dice_coefficient(self, 
+                     gt_polygons: List[Polygon], 
+                     pred_polygons: List[Polygon],
+                     dice_threshold: float = 0.5) -> float:
+        """
+        Compute mean Dice coefficient for predicted polygons matched to ground-truth polygons.
+        Matching is done greedily by highest Dice score (no IoU required). Unmatched 
+        ground-truth polygons are penalized by assigning them a Dice score of 0.0, ensuring 
+        the mean is computed over all GTs.
+
+        Args:
+            gt_polygons (List[Polygon]): A list of ground truth polygons.
+            pred_polygons (List[Polygon]): Predicted polygons.
+            dice_threshold (float): Dice threshold for considering a match. Default 0.5.
+
+        Returns:
+            float: Mean Dice coefficient across all GT polygons (matched pairs use computed Dice;
+                   unmatched GTs use 0.0). Returns 0.0 if no GT polygons or no valid matches/predictions.
+
+        Edge Cases:
+            - If gt_polygons is empty, returns 0.0.
+            - If pred_polygons is empty, returns 0.0 (all GTs are effectively unmatched).
+            - Polygons that are empty or have zero area will yield Dice of 0.0.
+        """
+        if not gt_polygons: return 0.0
+        if not pred_polygons: return 0.0
+
+        num_gt = len(gt_polygons)
+        gt_matched_map = np.zeros(num_gt, dtype=bool)
+        dice_scores = []
+
+        # Create a copy of preds to remove matched ones (for greedy highest-Dice matching)
+        available_preds = list(pred_polygons)
+
+        while available_preds:
+            best_dice = -1.0
+            best_gt_idx = -1
+            best_pred_idx = -1
+
+            for pred_idx, pred_polygon in enumerate(available_preds):
+                for gt_idx, gt_polygon in enumerate(gt_polygons):
+                    if gt_matched_map[gt_idx]:
+                        continue
+                    current_dice = self.getDice(gt_polygon, pred_polygon)
+                    if current_dice > best_dice:
+                        best_dice = current_dice
+                        best_gt_idx = gt_idx
+                        best_pred_idx = pred_idx
+
+            if best_dice >= dice_threshold and best_gt_idx != -1:
+                # Found a match: append the Dice and mark as matched
+                dice_scores.append(best_dice)
+                gt_matched_map[best_gt_idx] = True
+                # Remove the matched pred from available list
+                del available_preds[best_pred_idx]
+            else:
+                # No more valid matches; stop
+                break
+
+        # Penalize unmatched GTs by appending 0.0 for each
+        unmatched_count = np.sum(~gt_matched_map)
+        dice_scores.extend([0.0] * unmatched_count)
+
+        return float(np.mean(dice_scores)) if dice_scores else 0.0
+
 class IOUBasedMetrics:
     def __init__(self) -> None:
         """
@@ -58,18 +135,6 @@ class IOUBasedMetrics:
 
         # IoU calculation
         return intersection_area / union_area if union_area > 0 else 0.0
-    
-    def getDice(self, poly1: Polygon, poly2: Polygon) -> float:
-        """
-        Helper: Compute Dice coefficient between two polygons.
-
-        Returns 0.0 if either polygon is invalid, empty (zero-area), or if the sum of areas is zero
-        to avoid division by zero. Empty or zero-area polygons are treated as having no overlap.
-        """
-        if not poly1.is_valid or not poly2.is_valid:
-            return 0.0
-        inter = poly1.intersection(poly2).area
-        return (2 * inter) / (poly1.area + poly2.area) if (poly1.area + poly2.area) > 0 else 0.0
 
     def match_polygons(self, gt_polygons: List[Polygon], pred_polygons: List[Polygon], iou_threshold=0.5) -> Tuple[Dict[Tuple[int, int], float], np.ndarray, np.ndarray]:
         """
@@ -310,62 +375,6 @@ class IOUBasedMetrics:
         # mAP is the mean of APs over the IoU thresholds
         map_score = np.mean(average_precisions) if average_precisions else 0.0
         return map_score
-    
-    def compute_dice(self, 
-                     gt_polygons: List[Polygon], 
-                     pred_polygons_with_scores: List[Tuple[Polygon, float]], 
-                     iou_threshold: float = 0.5) -> float:
-        """
-        Compute mean Dice coefficient for predicted polygons matched to ground-truth polygons.
-        Matching is done greedily by IoU threshold. Unmatched ground-truth polygons are penalized
-        by assigning them a Dice score of 0.0, ensuring the mean is computed over all GTs.
-
-        Args:
-            gt_polygons (List[Polygon]): A list of ground truth polygons.
-            pred_polygons_with_scores (List[Tuple[Polygon, float]]): Predicted polygons with confidence scores.
-            iou_threshold (float): IoU threshold for considering a match. Default 0.5.
-
-        Returns:
-            float: Mean Dice coefficient across all GT polygons (matched pairs use computed Dice;
-                   unmatched GTs use 0.0). Returns 0.0 if no GT polygons or no valid matches/predictions.
-
-        Edge Cases:
-            - If gt_polygons is empty, returns 0.0.
-            - If pred_polygons_with_scores is empty, returns 0.0 (all GTs are effectively unmatched).
-            - Polygons that are empty or have zero area will yield Dice/IoU of 0.0 in helpers.
-        """
-        if not gt_polygons: return 0.0
-        if not pred_polygons_with_scores: return 0.0
-
-        num_gt = len(gt_polygons)
-        sorted_preds = sorted(pred_polygons_with_scores, key=lambda x: x[1], reverse=True)
-        pred_polygons_sorted = [p[0] for p in sorted_preds]
-
-        gt_matched_map = np.zeros(num_gt, dtype=bool)
-        dice_scores = []
-
-        for pred_polygon in pred_polygons_sorted:
-            best_iou = -1.0
-            best_gt_idx = -1
-            for gt_idx, gt_polygon in enumerate(gt_polygons):
-                if gt_matched_map[gt_idx]:
-                    continue
-                iou = self.getIOU(gt_polygon, pred_polygon)
-                if iou > best_iou:
-                    best_iou = iou
-                    best_gt_idx = gt_idx
-
-            # If IoU passes threshold, compute Dice
-            if best_iou >= iou_threshold and best_gt_idx != -1:
-                dice = self.getDice(gt_polygons[best_gt_idx], pred_polygon)
-                dice_scores.append(dice)
-                gt_matched_map[best_gt_idx] = True
-
-        # Penalize unmatched GTs by appending 0.0 for each
-        unmatched_count = np.sum(~gt_matched_map)
-        dice_scores.extend([0.0] * unmatched_count)
-
-        return float(np.mean(dice_scores)) if dice_scores else 0.0
     
 class PixelBasedMetrics:
     def __init__(self) -> None:

@@ -13,3 +13,7 @@ solafune_tools/osm/super_resolution/datasets/
 solafune_tools/osm/super_resolution/working/
 solafune_tools/osm/super_resolution/weights/
 .DS_Store
+*.gif
+venv/
+demo_data/
+tests/data-test/tif/

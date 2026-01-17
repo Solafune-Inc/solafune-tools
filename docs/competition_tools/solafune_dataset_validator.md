@@ -92,3 +92,30 @@ submission_file = "path/to/your/file.json"
 validated_submission = pq_scoring_submission.submission_validator(pred_file_path = submission_file, ann_type = "segmentation")
 print(validated_submission)
 ```
+
+### Validate CSV Submission (Regression)
+
+For regression tasks (e.g., Construction Cost Prediction), you can use the `check_csv` function.
+
+```python
+import pandas as pd
+from solafune_tools.competition_tools.quality_checker import check_csv, return_error_message
+
+# Load your dataframe
+df = pd.read_csv("submission.csv")
+required_columns = ["data_id", "construction_cost_per_m2_usd"]
+
+# Validate
+error_code = check_csv(df, required_columns)
+message = return_error_message(error_code, filetype="csv")
+
+print(f"Code: {error_code}, Message: {message}")
+```
+
+#### Error Codes for CSV
+
+- **0**: Valid
+- **20**: Missing required columns
+- **21**: Contains negative values (invalid for cost/price)
+- **22**: Contains NaN/missing values
+

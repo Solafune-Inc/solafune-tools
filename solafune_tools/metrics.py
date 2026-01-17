@@ -387,3 +387,43 @@ class PixelBasedMetrics:
             fbeta = 0.0  # If precision and recall are both 0
 
         return fbeta, precision, recall
+
+class RegressionMetrics:
+    def __init__(self) -> None:
+        """
+        Initializes the RegressionMetrics class. No parameters are needed.
+        """
+        pass
+
+    def compute_rmsle(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+        """
+        Computes Root Mean Squared Logarithmic Error (RMSLE).
+
+        Args:
+            y_true (np.ndarray): Array of true values.
+            y_pred (np.ndarray): Array of predicted values.
+
+        Returns:
+            float: RMSLE score.
+        """
+        # Clip negative predictions to 0 before log to avoid errors
+        y_pred = np.maximum(y_pred, 0)
+        
+        # log1p computes log(1 + x)
+        log_true = np.log1p(y_true)
+        log_pred = np.log1p(y_pred)
+        
+        return np.sqrt(np.mean(np.square(log_pred - log_true)))
+
+    def compute_rmse(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+        """
+        Computes Root Mean Squared Error (RMSE).
+
+        Args:
+            y_true (np.ndarray): Array of true values.
+            y_pred (np.ndarray): Array of predicted values.
+
+        Returns:
+            float: RMSE score.
+        """
+        return np.sqrt(np.mean(np.square(y_pred - y_true)))

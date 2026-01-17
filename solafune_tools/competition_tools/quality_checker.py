@@ -1,3 +1,6 @@
+import pandas as pd
+import numpy as np
+
 def check_dict(pd_dict: dict = {}, gt_dict: dict = {}, 
                ann_type: str = "segmentation",
                use_dimensions: bool = False, 
@@ -90,6 +93,30 @@ def check_dict(pd_dict: dict = {}, gt_dict: dict = {},
 
     return 0
 
+def check_csv(submission_df: pd.DataFrame, required_columns: list) -> int:
+    """
+    Check the format of the submission dataframe.
+    Error codes:
+        0: Valid
+        20: Missing required columns
+        21: Contains negative values (invalid for cost/price)
+        22: Contains NaN/missing values
+    """
+    # Check for required columns
+    if not all(col in submission_df.columns for col in required_columns):
+        return 20
+    
+    # Check for NaN/missing values
+    if submission_df.isnull().values.any():
+        return 22
+
+    # Check for negative values (only in numeric columns)
+    numeric_cols = submission_df.select_dtypes(include=[np.number]).columns
+    if (submission_df[numeric_cols] < 0).any().any():
+        return 21
+
+    return 0
+
 def return_error_message(error_code: int, filetype: str = "json") -> str:
     """
     Set the error messages of the prediction dictionaries or zipfile.
@@ -147,5 +174,15 @@ def return_error_message(error_code: int, filetype: str = "json") -> str:
             return "Either bbox.json or segmentation.json not found."
         elif error_code == 9:
             return "Error extracting zip file."
+
+    elif filetype == "csv":
+        if error_code == 0:
+            return "Valid"
+        elif error_code == 20:
+            return "Missing required columns."
+        elif error_code == 21:
+            return "Contains negative values (invalid for cost/price)."
+        elif error_code == 22:
+            return "Contains NaN/missing values."
         
     return "Unknown error, contact the developer for more information."

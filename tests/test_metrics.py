@@ -438,3 +438,43 @@ def test_pixel_based_f1_score_perfect_score():
     assert precision == 1
     assert recall == 1
 
+
+# ---------------------> Below are the tests for RegressionMetrics
+
+from solafune_tools.metrics import RegressionMetrics
+import numpy as np
+
+def test_regression_rmsle():
+    rm = RegressionMetrics()
+    y_true = np.array([100, 1000, 10000])
+    y_pred = np.array([110, 900, 10500])
+    
+    # Expected: 
+    # log1p(100)=4.615, log1p(110)=4.710. diff=0.095. sq=0.009
+    # log1p(1000)=6.909, log1p(900)=6.804. diff=-0.105. sq=0.011
+    # log1p(10000)=9.210, log1p(10500)=9.259. diff=0.049. sq=0.002
+    # mean sq = (0.009+0.011+0.002)/3 = 0.0073. sqrt=0.085
+    
+    rmsle = rm.compute_rmsle(y_true, y_pred)
+    assert 0.08 < rmsle < 0.09
+
+def test_regression_rmsle_negative_input():
+    rm = RegressionMetrics()
+    y_true = np.array([100])
+    y_pred = np.array([-50]) 
+    # Should clip -50 to 0.
+    # log1p(100) = 4.615. log1p(0) = 0. diff = 4.615.
+    
+    rmsle = rm.compute_rmsle(y_true, y_pred)
+    assert rmsle > 4.6
+    assert rmsle < 4.7
+
+def test_regression_rmse():
+    rm = RegressionMetrics()
+    y_true = np.array([10, 20])
+    y_pred = np.array([12, 18])
+    # diffs: 2, -2. sq: 4, 4. mean: 4. sqrt: 2.
+    
+    rmse = rm.compute_rmse(y_true, y_pred)
+    assert rmse == 2.0
+

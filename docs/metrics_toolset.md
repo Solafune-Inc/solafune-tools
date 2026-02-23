@@ -230,6 +230,62 @@ print("Recall: ", recall)
 
 ---
 
+## 📉 Regression Metrics
+
+We provide metrics for regression tasks, such as cost prediction or value estimation.
+
+### 📉 RegressionMetrics Class
+
+This class contains methods for computing common regression metrics.
+
+#### 👤 Authors Information
+
+- **Author**: Solafune Team
+
+#### 🚀 Getting Started with Regression Metrics
+
+```python
+import numpy as np
+from solafune_tools.metrics import RegressionMetrics
+
+rm = RegressionMetrics()
+
+y_true = np.array([100, 1000, 10000])
+y_pred = np.array([110, 900, 10500])
+
+# Compute RMSLE
+rmsle = rm.compute_rmsle(y_true, y_pred)
+print(f"RMSLE: {rmsle}")
+
+# Compute RMSE
+rmse = rm.compute_rmse(y_true, y_pred)
+print(f"RMSE: {rmse}")
+```
+
+#### 🔧 Available Methods
+
+##### `compute_rmsle(y_true, y_pred)`
+
+Computes **Root Mean Squared Logarithmic Error (RMSLE)**.
+- **Robustness**: Automatically clips negative predictions to 0 before applying the logarithm, ensuring stability.
+- **Formula**: `sqrt(mean((log1p(pred) - log1p(true))^2))`
+
+##### `compute_rmse(y_true, y_pred)`
+
+Computes **Root Mean Squared Error (RMSE)**.
+- **Formula**: `sqrt(mean((pred - true)^2))`
+
+#### 📥 Input Parameters
+
+- `y_true`: Array of true values (numpy array).
+- `y_pred`: Array of predicted values (numpy array).
+
+#### 📤 Output
+
+- Float value representing the error metric (lower is better).
+
+---
+
 ### 🥇 Mean Average Precision Function
 
 This function computes **Mean Average Precision (mAP)**, a widely-used metric in **object detection**. It summarizes the **precision-recall** trade-off across various **IoU thresholds**.

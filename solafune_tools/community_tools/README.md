@@ -34,4 +34,4 @@ Tools repository where Solafune hackers can share their tools on satellite data-
 
 ## Listed Community Tools
 
-Currently, there are no community tools that can be listed. We hope for your contribution.
+1. [Raster Regression Tools](raster_regression/README.md) — submission validation, zip-level ensembling, and isotonic calibration for GeoTIFF-zip regression competitions.

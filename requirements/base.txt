@@ -1,6 +1,8 @@
 dask>=2024.9.0,<2025.4.1
 geopandas<=1.1.2
-pillow==12.1.1
+# Pillow 13 (fixes CVE-2026-112400) requires Python >= 3.11; Python 3.10 stays on the last 12.x release
+pillow==13.0.0; python_version >= "3.11"
+pillow==12.3.0; python_version < "3.11"
 planetary_computer<=1.0.0
 pystac<=1.12.2
 pystac_client<=0.8.6
@@ -10,6 +12,7 @@ stac_geoparquet<=0.6.0
 stackstac<=0.5.1
 shapely<=2.0.7
 numpy<=1.26.4
+pyarrow<26
 tqdm<=4.67.1
 rasterio<=1.4.3
 pandas

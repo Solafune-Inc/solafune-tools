@@ -1,7 +1,9 @@
 torch >= 2.6.0
 torchvision >=0.22.1
 torchaudio >= 2.6.0
-opencv-python >= 4.11.0.86
+opencv-python >= 4.11.0.86, < 5
+# albumentations pulls in the headless build; keep both cv2 builds on 4.x
+opencv-python-headless < 5
 scikit-image >= 0.22.0
 tqdm >= 4.66.1
 madgrad == 1.3
@@ -9,12 +11,12 @@ matplotlib == 3.10.8
 timm == 0.9.10
 torchsr == 1.0.4
 clearml == 2.1.3
-pandas == 2.1.3
+pandas == 2.3.3
 pytest == 7.4.3
 natsort == 8.4.0
 colorama == 0.4.6
 python-box == 7.1.1
-scikit-learn == 1.3.2
+scikit-learn == 1.7.2
 albumentations == 1.3.1
 pytorch-lightning == 2.5.2
 beautifulsoup4 == 4.12.2
@@ -27,5 +29,8 @@ empatches == 0.2.3
 # Pillow 13 (fixes CVE-2026-112400) and streamlit 1.66.1 require Python >= 3.11
 pillow == 13.0.0; python_version >= "3.11"
 pillow == 12.3.0; python_version < "3.11"
-imagecodecs == 2024.6.1
-numpy == 1.26.4
+# numpy 2.3+ and imagecodecs 2025.8+ require Python >= 3.11
+imagecodecs == 2026.3.6; python_version >= "3.11"
+imagecodecs == 2024.6.1; python_version < "3.11"
+numpy == 2.4.6; python_version >= "3.11"
+numpy == 2.2.6; python_version < "3.11"

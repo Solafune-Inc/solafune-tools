@@ -20,9 +20,12 @@ pytorch-lightning == 2.5.2
 beautifulsoup4 == 4.12.2
 transformers == 4.53.3
 lion-pytorch == 0.1.2
-streamlit == 1.54.0
+streamlit == 1.66.1; python_version >= "3.11"
+streamlit == 1.54.0; python_version < "3.11"
 python-multipart == 0.0.22
 empatches == 0.2.3
-pillow == 12.1.1
+# Pillow 13 (fixes CVE-2026-112400) and streamlit 1.66.1 require Python >= 3.11
+pillow == 13.0.0; python_version >= "3.11"
+pillow == 12.3.0; python_version < "3.11"
 imagecodecs == 2024.6.1
 numpy == 1.26.4

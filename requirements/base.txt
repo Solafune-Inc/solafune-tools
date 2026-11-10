@@ -6,7 +6,7 @@ pillow==12.3.0; python_version < "3.11"
 planetary_computer<=1.0.0
 pystac<=1.12.2
 pystac_client<=0.8.6
-requests<=2.32.3
+requests<=2.34.2
 rioxarray<=0.18.2
 stac_geoparquet<=0.6.0
 stackstac<=0.5.1

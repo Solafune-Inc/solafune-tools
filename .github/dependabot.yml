@@ -1,0 +1,48 @@
+# ===========================================================================
+# 依存の更新の PR を Dependabot に作らせる（週次）。
+#
+# minor・patch はまとめて 1 本の PR にする。major は 1 つずつ別の PR（中身を読んで判断する）。
+# 公開されてから 7 日は待つ（公開直後に差し替えられた悪意のある版を取り込まないため）。
+# 取り込むかどうかは人が PR で判断する（自動でマージしない）。CI の検査がすべて通ることが前提。
+# 上げられない依存は ignore に理由（PR・issue の番号）を添えて書く。
+# ===========================================================================
+version: 2
+updates:
+  - package-ecosystem: pip           # pyproject.toml は requirements/*.txt を dynamic で読む
+    directory: /requirements         # base.txt・super_resolution.txt
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 3
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      python-minor-patch:
+        update-types: [minor, patch]
+    # requirements/*.txt で意図的に上限を付けている依存
+    ignore:
+      - dependency-name: opencv-python           # NumPy 2 に上げたときに OpenCV 5.0 を引き込まないよう 5 未満に固定（8b1401e）
+        versions: [">=5"]
+      - dependency-name: opencv-python-headless  # albumentations が引き込む。opencv-python と揃えて 4.x（8b1401e）
+        versions: [">=5"]
+
+  # python-publish.yml・run-pytest.yml の actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 3
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      actions-minor-patch:
+        update-types: [minor, patch]

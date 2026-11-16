@@ -11,7 +11,7 @@ rioxarray<=0.18.2
 stac_geoparquet<=0.6.0
 stackstac<=0.5.1
 shapely<=2.1.2
-numpy>=2.0,<3
+numpy>=2.5.4,<3
 tqdm<=4.67.1
 rasterio<=1.4.4
 pandas
